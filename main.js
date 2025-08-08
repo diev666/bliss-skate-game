@@ -363,7 +363,7 @@ function render(){
   for(const o of state.obstacles){
     const frame = (o.t==='cone'?0:(o.t==='bag'?1:2));
     const sx = frame*16, sy=0;
-    if(img.obs.complete){ ctx.drawImage(img.obs, sx,sy,16,16, o.x, o.y-16, 20,16); }
+    if(img.obs.complete){ ctx.drawImage(img.obs, sx, sy, 16, 16, Math.floor(o.x), Math.floor(o.y-16), 16, 16); }
     else{ ctx.fillStyle='#ff7'; ctx.fillRect(o.x, o.y-16, 18,14); }
     if(state.showHit){ ctx.strokeStyle='lime'; ctx.strokeRect(o.x, o.y-(o.h||14), (o.w||18), (o.h||14)); }
   }
@@ -454,11 +454,7 @@ function render(){
   }
 
   // menu/overlays
-  if(state.mode==='MENU'){
-    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
-    ctx.fillStyle='#fff'; ctx.font='bold 18px system-ui'; ctx.fillText('Skate Bliss', 170, 70);
-    ctx.font='12px system-ui'; ctx.fillStyle='#a5a5ad'; ctx.fillText('Pressione ENTER para Jogar', 150, 100);
-  }
+  // old MENU overlay removed
   if(state.mode==='PAUSE'){
     ctx.fillStyle='rgba(0,0,0,.45)'; ctx.fillRect(0,0,cvs.width,cvs.height);
     ctx.fillStyle='#fff'; ctx.font='bold 16px system-ui'; ctx.fillText('Pausado', 200, 100);
@@ -476,8 +472,8 @@ function render(){
 
 addEventListener('keydown',e=>{
   if(e.code==='Enter'){
-    if(state.mode==='MENU'){ resetRun(); }
-    else if(state.mode==='GAMEOVER'){ resetRun(); }
+    if(state.mode==='GAMEOVER'){ resetRun(); }
+    // MENU handled in navigation handler
   }
 });
 
@@ -530,3 +526,5 @@ addEventListener('keydown',e=>{
     if(e.code==='Escape'||e.code==='Enter') state.mode='MENU';
   }
 });
+
+addEventListener('keydown',e=>{ if(e.code==='Escape' && state.mode==='GAMEOVER'){ state.mode='MENU'; } });
