@@ -1,24 +1,25 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Skate Bliss (v9.0)</title>
-  <meta name="description" content="Runner 2D com tricks, CDs e Especial com slow-mo.">
-  <link rel="stylesheet" href="style.css?v=900">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skate Bliss (v9.1)</title>
+  <meta name="description" content="Skate Bliss — runner 2D com tricks, combos, especial e trilha sonora."/>
+  <link rel="stylesheet" href="style.css?v=910"/>
 </head>
 <body>
   <main id="app">
     <header class="topbar">
       <h1>SKATE BLISS</h1>
       <div class="controls">
-        <button id="btn-help">?</button>
-        <button id="btn-sfx">🔈 SFX</button>
+        <button id="btn-help" aria-label="Ajuda">?</button>
+        <button id="btn-mute-sfx" aria-label="SFX">🔈 SFX</button>
       </div>
     </header>
 
-    <section id="wrap">
+    <section id="game-wrap">
       <canvas id="game" width="480" height="270"></canvas>
+
       <div id="hud">
         <div class="stat">Pontuação: <span id="score">0</span></div>
         <div class="stat">Recorde: <span id="best">0</span></div>
@@ -27,18 +28,19 @@
         <button id="btn-lb">Ranking</button>
       </div>
 
-      <div id="player">
+      <div id="player-bar">
         <button id="prev">⏮</button>
         <button id="play">⏯</button>
         <button id="next">⏭</button>
         <span id="track">Sem músicas na pasta (assets/music)</span>
-        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.30">
-        <button id="btn-music">🔊 Música</button>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.30"/>
+        <button id="btn-mute-music">🔊 Música</button>
       </div>
 
       <footer id="foot">© BLISS</footer>
     </section>
   </main>
-  <script type="module" src="main.js?v=900"></script>
+
+  <script type="module" src="main.js?v=910"></script>
 </body>
 </html>
