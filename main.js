@@ -5,7 +5,7 @@
 
 // Safe DOM helpers
 function $(s){ return document.querySelector(s); }
-const VERSION='765'; const CB='?v='+VERSION; let assetErrors=[];
+const VERSION='766'; const CB='?v='+VERSION; let assetErrors=[];
 function on(el,ev,fn){ if(el && el.addEventListener) el.addEventListener(ev,fn); }
 
 // Canvas
@@ -98,10 +98,8 @@ state.showHit = opts.hit;
 state.mode = 'MENU';
 state.fade = 0; // for transitions
 // Options persisted
-const OPTS_KEY = 'skate_bliss_opts';
-function loadOpts(){
-  try{
-    const o = JSON.parse(localStorage.getItem(OPTS_KEY)||'{}');
+
+');
     return {
       vol: typeof o.vol==='number'? o.vol : 0.30,
       sfx: typeof o.sfx==='boolean'? o.sfx : false,
@@ -110,8 +108,8 @@ function loadOpts(){
     };
   }catch(_){ return {vol:0.30,sfx:false,hit:false,diff:'NORMAL'}; }
 }
-function saveOpts(){ localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); }
-const opts = loadOpts();
+
+
 // apply opts to current session
 if(musicEl){ musicEl.volume = opts.vol; }
 if(volEl){ volEl.value = String(opts.vol.toFixed(2)); }
@@ -235,10 +233,8 @@ state.showHit = opts.hit;
 state.mode = 'MENU';
 state.fade = 0; // for transitions
 // Options persisted
-const OPTS_KEY = 'skate_bliss_opts';
-function loadOpts(){
-  try{
-    const o = JSON.parse(localStorage.getItem(OPTS_KEY)||'{}');
+
+');
     return {
       vol: typeof o.vol==='number'? o.vol : 0.30,
       sfx: typeof o.sfx==='boolean'? o.sfx : false,
@@ -247,8 +243,8 @@ function loadOpts(){
     };
   }catch(_){ return {vol:0.30,sfx:false,hit:false,diff:'NORMAL'}; }
 }
-function saveOpts(){ localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); }
-const opts = loadOpts();
+
+
 // apply opts to current session
 if(musicEl){ musicEl.volume = opts.vol; }
 if(volEl){ volEl.value = String(opts.vol.toFixed(2)); }
