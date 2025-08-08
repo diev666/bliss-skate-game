@@ -86,7 +86,7 @@ on(window,'keydown',e=>{ if(e.code==='KeyH') state.showHit=!state.showHit; });
 // Obstáculos
 const OB_TYPES=[
   {name:'cone',   sx:0,  sy:0, w:24,h:24, bbox:{x:4,y:6,w:16,h:16}, sfx:()=>playSFX(sfxCone)},
-  {name:'bag',    sx:24, sy:0, w:24,h:24, bbox:{x:3,y:8,w:18,h:14}, sfx:=>playSFX(sfxBag)},
+  {name:'bag',    sx:24, sy:0, w:24,h:24, bbox:{x:3,y:8,w:18,h:14}, sfx:()=>playSFX(sfxBag)},
   {name:'bottle', sx:48, sy:0, w:24,h:24, bbox:{x:8,y:4,w:8,h:18},  sfx:()=>playSFX(sfxBottle)},
 ];
 function spawnObstacle(){
