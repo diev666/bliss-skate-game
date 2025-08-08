@@ -1,8 +1,8 @@
-// BLISS — Skate Trick v4
-// - CDs colecionáveis (aumentam multiplicador e dão bônus)
-// - Multiplicador de pontos visível (reseta ao bater, decai levemente com o tempo sem pegar CDs)
-// - PS1 vibe sutil: HUD bold, cores punk, popups
-// - Mantém obstáculos distintos e colisões justas
+// BLISS — Skate Trick v5
+// - Hitbox do player aumentada (mais honesta/visível)
+// - Partículas no pulo e na colisão
+// - Camera shake na colisão
+// - SFX por obstáculo + jump + CD
 
 const cvs = document.getElementById('game');
 const ctx = cvs.getContext('2d',{alpha:false});
@@ -13,14 +13,23 @@ const btnLB=$('#btn-leaderboard'), btnCloseLB=$('#btn-close-lb'), btnResetLB=$('
 const btnHelp=$('#btn-help'), helpEl=$('#help'), btnCloseHelp=$('#btn-close-help');
 const btnMute=$('#btn-mute');
 
+// SFX
+const sfxJump = $('#sfx-jump');
+const sfxCD = $('#sfx-cd');
+const sfxCone = $('#sfx-cone');
+const sfxBag = $('#sfx-bag');
+const sfxBottle = $('#sfx-bottle');
+
+let muted=false; btnMute.addEventListener('click',()=>{muted=!muted;btnMute.textContent=muted?'🔇':'🔈'});
+function play(s){ if(!muted){ try{ s.currentTime=0; s.play(); }catch(e){} } }
+
 // Assets
-const imgSkater = new Image(); imgSkater.src='assets/skater.png'; // 3 frames 32x32
-const imgObs    = new Image(); imgObs.src='assets/obstacles.png'; // 3 sprites 24x24
-const imgCD     = new Image(); imgCD.src='assets/collectibles.png'; // 2 frames 16x16
+const imgSkater = new Image(); imgSkater.src='assets/skater.png';
+const imgObs    = new Image(); imgObs.src='assets/obstacles.png';
+const imgCD     = new Image(); imgCD.src='assets/collectibles.png';
 const imgGround = new Image(); imgGround.src='assets/ground.png';
 const imgSky    = new Image(); imgSky.src='assets/skyline.png';
 
-let muted=false; btnMute.addEventListener('click',()=>{muted=!muted;btnMute.textContent=muted?'🔇':'🔈'});
 let showHitbox=false;
 addEventListener('keydown',e=>{ if(e.code==='KeyH') showHitbox=!showHitbox; });
 
@@ -46,21 +55,18 @@ const groundTop = 230, groundY = groundTop-10;
 // Estado
 const state = {
   running:true,t:0,score:0,best:+(localStorage.getItem('bliss_skate_best')||0),
-  mult:1, multTime:0, // tempo desde o último CD (para decaimento suave)
-  player:{x:60,y:groundY,vx:0,vy:0,w:20,h:20,onGround:true,frame:0,animTimer:0,anim:'roll'},
-  obstacles:[],
-  cds:[],
-  popups:[],
-  spawnCooldown: 1100,
-  cdCooldown: 1500,
+  mult:1, multTime:0,
+  player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,animTimer:0,anim:'roll'}, // hitbox maior
+  obstacles:[], cds:[], popups:[], particles:[],
+  spawnCooldown: 1000, cdCooldown: 1200,
   speedBase: 2.0,
-  skyOffset:0, groundOffset:0,
-  cdAnim:0
+  skyOffset:0, groundOffset:0, cdAnim:0,
+  shake:0 // intensidade do shake
 };
 bestEl.textContent=state.best; multEl.textContent=state.mult.toFixed(1)+'×';
 
 // Leaderboard
-const LB_KEY='bliss_skate_lb_v4', BEST_KEY='bliss_skate_best';
+const LB_KEY='bliss_skate_lb_v5', BEST_KEY='bliss_skate_best';
 const loadLB=()=>{try{return JSON.parse(localStorage.getItem(LB_KEY)||'[]')}catch{return[]}};
 const saveLB=lb=>localStorage.setItem(LB_KEY,JSON.stringify(lb.slice(0,5)));
 function submitScore(name,value){const lb=loadLB();lb.push({name,value,ts:Date.now()});lb.sort((a,b)=>b.value-a.value);saveLB(lb);}
@@ -71,9 +77,9 @@ btnHelp.addEventListener('click',()=>helpEl.hidden=false);btnCloseHelp.addEventL
 
 // Obstáculos
 const OB_TYPES=[
-  {name:'cone',   sx:0,  sy:0, w:24,h:24, bbox:{x:4,y:6,w:16,h:16}},
-  {name:'bag',    sx:24, sy:0, w:24,h:24, bbox:{x:3,y:8,w:18,h:14}},
-  {name:'bottle', sx:48, sy:0, w:24,h:24, bbox:{x:8,y:4,w:8,h:18}},
+  {name:'cone',   sx:0,  sy:0, w:24,h:24, bbox:{x:4,y:6,w:16,h:16}, sfx:()=>play(sfxCone)},
+  {name:'bag',    sx:24, sy:0, w:24,h:24, bbox:{x:3,y:8,w:18,h:14}, sfx:()=>play(sfxBag)},
+  {name:'bottle', sx:48, sy:0, w:24,h:24, bbox:{x:8,y:4,w:8,h:18},  sfx:()=>play(sfxBottle)},
 ];
 function spawnObstacle(){
   const type=OB_TYPES[Math.floor(Math.random()*OB_TYPES.length)];
@@ -91,8 +97,8 @@ function updateObstacles(dt){
   state.spawnCooldown-=dt;
   if(state.spawnCooldown<=0){
     spawnObstacle();
-    const base = 1100 - Math.min(400, Math.floor(state.score/10)*15);
-    state.spawnCooldown = Math.max(700, base) + Math.random()*180;
+    const base = 1000 - Math.min(350, Math.floor(state.score/10)*15);
+    state.spawnCooldown = Math.max(680, base) + Math.random()*180;
   }
   state.obstacles.forEach(o=>o.x-=o.speed);
   state.obstacles = state.obstacles.filter(o=>o.x+o.w>-30);
@@ -100,14 +106,13 @@ function updateObstacles(dt){
 
 // CDs
 function spawnCD(){
-  const speed = state.speedBase + 1.2; // um pouco mais rápido que o scroll base
+  const speed = state.speedBase + 1.2;
   let x = cvs.width + 30;
-  // evite nascer colado em obstáculo recente
   if(state.obstacles.length){
     const last=state.obstacles[state.obstacles.length-1];
     x = Math.max(x, last.x + last.w + 60);
   }
-  const minY = 120, maxY = 200; // altura para coletar com salto
+  const minY = 120, maxY = 200;
   const y = Math.floor(minY + Math.random()*(maxY-minY));
   state.cds.push({x, y, w:16, h:16, speed});
 }
@@ -115,28 +120,43 @@ function updateCDs(dt){
   state.cdCooldown -= dt;
   if(state.cdCooldown<=0){
     spawnCD();
-    state.cdCooldown = 1500 + Math.random()*1200;
+    state.cdCooldown = 1400 + Math.random()*1200;
   }
   state.cds.forEach(c=>c.x -= (c.speed));
   state.cds = state.cds.filter(c=>c.x + c.w > -20);
-  // animação simples (gira 2 frames)
   state.cdAnim = (state.cdAnim + dt) % 400;
 }
 
-// Colisão util
-function aabb(ax,ay,aw,ah,bx,by,bw,bh){ return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by; }
+// Partículas
+function addParticles(x,y,n=10, col='#fffb7a'){
+  for(let i=0;i<n;i++){
+    state.particles.push({
+      x, y, vx:(Math.random()*2-1)*1.2, vy:(Math.random()*-1.5)-0.5,
+      life: 500 + Math.random()*400, color: col, size: 2+Math.random()*2
+    });
+  }
+}
+function updateParticles(dt){
+  for(const p of state.particles){
+    p.vy += 0.002*dt; // gravidade leve
+    p.x += p.vx*dt*0.06; p.y += p.vy*dt*0.06;
+    p.life -= dt;
+  }
+  state.particles = state.particles.filter(p=>p.life>0);
+}
 
-function addPopup(text,x,y,color='#fffb7a'){
-  state.popups.push({text,x,y,vy:-0.3,life:900,color});
-}
-function updatePopups(dt){
-  state.popups.forEach(p=>{p.y += p.vy*dt; p.life -= dt;});
-  state.popups = state.popups.filter(p=>p.life>0);
-}
+// Utils
+function aabb(ax,ay,aw,ah,bx,by,bw,bh){ return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by; }
+function addPopup(text,x,y,color='#fffb7a'){ state.popups.push({text,x,y,vy:-0.3,life:900,color}); }
+function updatePopups(dt){ state.popups.forEach(p=>{p.y+=p.vy*dt;p.life-=dt}); state.popups=state.popups.filter(p=>p.life>0); }
 
 // Fluxo
-function endRun(){
+function endRun(hitType){
   state.running=false;
+  // shake forte
+  state.shake = 14;
+  // sfx de acordo com obstáculo
+  if(hitType && hitType.sfx) hitType.sfx();
   if(state.score>state.best){state.best=state.score;bestEl.textContent=state.best;localStorage.setItem(BEST_KEY,String(state.best));}
   const raw=prompt('Seu nome para o ranking:','guest')||'guest';
   const name=raw.trim().slice(0,16)||'guest';
@@ -146,9 +166,9 @@ function endRun(){
 function resetRun(){
   Object.assign(state,{
     running:true,t:0,score:0,mult:1,multTime:0,
-    player:{x:60,y:groundY,vx:0,vy:0,w:20,h:20,onGround:true,frame:0,animTimer:0,anim:'roll'},
-    obstacles:[], cds:[], popups:[],
-    spawnCooldown:900, cdCooldown:1000, speedBase:2.0, skyOffset:0, groundOffset:0, cdAnim:0
+    player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,animTimer:0,anim:'roll'},
+    obstacles:[], cds:[], popups:[], particles:[],
+    spawnCooldown:900, cdCooldown:1000, speedBase:2.0, skyOffset:0, groundOffset:0, cdAnim:0, shake:0
   });
   last=performance.now(); requestAnimationFrame(loop);
 }
@@ -157,51 +177,46 @@ addEventListener('keydown',e=>{ if(!state.running && e.code==='KeyR') resetRun()
 let last=0;
 function update(dt){
   const p=state.player;
-  // movimento
+  // movimento + pulo
   p.vx += (input.right - input.left) * SPEED;
   p.vx *= FRICTION;
   p.vy += GRAV;
-  if(input.jump && p.onGround){ p.vy=JUMP; p.onGround=false; p.anim='ollie'; p.frame=1; p.animTimer=0; }
+  if(input.jump && p.onGround){
+    p.vy=JUMP; p.onGround=false; p.anim='ollie'; p.frame=1; p.animTimer=0;
+    play(sfxJump); addParticles(p.x+12, p.y-10, 12, '#9d7bff');
+  }
   p.x+=p.vx; p.y+=p.vy;
-  // chão
   if(p.y>groundY){ p.y=groundY; p.vy=0; p.onGround=true; if(p.anim!=='roll'){p.anim='roll';p.frame=0;} }
-  // limites
-  if(p.x<8) p.x=8;
-  if(p.x>cvs.width-8-p.w) p.x=cvs.width-8-p.w;
-  // animação do skater
-  p.animTimer+=dt;
-  if(p.anim==='ollie'){ p.frame = p.vy<-2 ? 2 : 1; }
+  if(p.x<8) p.x=8; if(p.x>cvs.width-8-p.w) p.x=cvs.width-8-p.w;
+  p.animTimer+=dt; if(p.anim==='ollie'){ p.frame = p.vy<-2 ? 2 : 1; }
 
-  // scroll visual
+  // scroll e dificuldade
   const scroll = 1.2 + Math.min(2.5, state.score/120);
   state.skyOffset = (state.skyOffset + scroll*0.2) % cvs.width;
   state.groundOffset = (state.groundOffset + scroll) % cvs.width;
-  // progressão
   state.speedBase = 2.0 + Math.min(2.0, state.score/200);
 
-  // Obstáculos/CDs
-  updateObstacles(dt);
-  updateCDs(dt);
+  // atualizações
+  updateObstacles(dt); updateCDs(dt); updateParticles(dt);
 
-  // Colisão com obstáculos (visíveis)
-  const pb = { x:p.x+6, y:(p.y-24)+6, w:8, h:12 };
+  // colisão com obstáculos
+  const pb = { x:p.x+5, y:(p.y-24)+4, w:12, h:14 }; // hitbox maior que v4
   for(const o of state.obstacles){
     if(o.x>cvs.width || o.x+o.w<0) continue;
     const b=o.type.bbox; const bx=o.x+b.x, by=o.y+b.y;
     if(aabb(pb.x,pb.y,pb.w,pb.h,bx,by,b.w,b.h)){
-      endRun(); return;
+      addParticles(p.x+12, p.y-10, 24, '#ff5555'); // burst
+      endRun(o.type); return;
     }
   }
 
-  // Coleta de CDs
-  const cdFrame = (state.cdAnim<200)?0:1;
+  // CDs
   for(let i=state.cds.length-1;i>=0;i--){
     const c=state.cds[i];
-    // hitbox pequena para coleta justa
     const cb = { x:c.x+3, y:c.y+3, w:10, h:10 };
     if(aabb(pb.x,pb.y,pb.w,pb.h,cb.x,cb.y,cb.w,cb.h)){
       state.cds.splice(i,1);
-      // aumentar mult e dar bônus
+      play(sfxCD); addParticles(c.x+8, c.y+8, 14, '#fffb7a');
       state.mult = Math.min(5, +(state.mult + 1).toFixed(1));
       state.multTime = 0;
       const bonus = 10 * state.mult;
@@ -212,14 +227,14 @@ function update(dt){
     }
   }
 
-  // Decaimento leve do multiplicador se passar tempo sem pegar CDs
+  // Decaimento do mult
   state.multTime += dt;
-  if(state.mult>1 && state.multTime>4000){ // após 4s começa a cair devagar
+  if(state.mult>1 && state.multTime>4000){
     state.mult = Math.max(1, +(state.mult - 0.002*dt).toFixed(1));
     multEl.textContent = state.mult.toFixed(1)+'×';
   }
 
-  // Score passivo multiplicado
+  // Pontos passivos * mult
   state.t+=dt;
   if(state.t>=60){
     const inc=Math.floor(state.t/60);
@@ -229,30 +244,38 @@ function update(dt){
   }
 
   updatePopups(dt);
+
+  // redução do shake
+  if(state.shake>0){ state.shake = Math.max(0, state.shake - 0.4*(dt/16.6)); }
 }
 
-function drawTiled(img,y,off){ const w=img.width; const x1=-off, x2=x1+w; ctx.drawImage(img,x1,y); ctx.drawImage(img,x2,y); }
+function drawTiled(img,y,off){
+  const w=img.width; const x1=-off, x2=x1+w; ctx.drawImage(img,x1,y); ctx.drawImage(img,x2,y);
+}
 
 function render(){
+  // camera shake offset
+  const sx = state.shake>0 ? (Math.random()*state.shake - state.shake/2) : 0;
+  const sy = state.shake>0 ? (Math.random()*state.shake - state.shake/2) : 0;
+  ctx.save(); ctx.translate(sx, sy);
+
   ctx.fillStyle='#0b0b0d'; ctx.fillRect(0,0,cvs.width,cvs.height);
   if(imgSky.complete) drawTiled(imgSky, 80, state.skyOffset);
   if(imgGround.complete) drawTiled(imgGround, groundTop, state.groundOffset);
 
-  // CDs (2 frames 16x16)
+  // CDs
   const cdFrame = (state.cdAnim<200)?0:1;
   for(const c of state.cds){
-    if(imgCD.complete){
-      ctx.drawImage(imgCD, cdFrame*16, 0, 16,16, c.x, c.y, 16,16);
-      if(showHitbox){ ctx.strokeStyle='#0ff'; ctx.strokeRect(c.x+3,c.y+3,10,10); }
-    }
+    if(imgCD.complete) ctx.drawImage(imgCD, cdFrame*16, 0, 16,16, c.x, c.y, 16,16);
+    if(showHitbox){ ctx.strokeStyle='#0ff'; ctx.strokeRect(c.x+3,c.y+3,10,10); }
   }
 
   // Player
   const p=state.player;
   if(imgSkater.complete){
-    const sx=(p.frame%3)*32, sy=0;
-    ctx.drawImage(imgSkater, sx, sy, 32,32, p.x, p.y-24, 32,32);
-    if(showHitbox){ ctx.strokeStyle='#0f0'; ctx.strokeRect(p.x+6,(p.y-24)+6,8,12); }
+    const sxp=(p.frame%3)*32, sy=0;
+    ctx.drawImage(imgSkater, sxp, sy, 32,32, p.x, p.y-24, 32,32);
+    if(showHitbox){ ctx.strokeStyle='#0f0'; ctx.strokeRect(p.x+5,(p.y-24)+4,12,14); }
   }
 
   // Obstáculos
@@ -263,16 +286,26 @@ function render(){
     }
   }
 
-  // Popups estilo arcade
+  // Partículas
+  for(const prt of state.particles){
+    ctx.globalAlpha = max(0, prt.life/900);
+    ctx.fillStyle = prt.color;
+    ctx.fillRect(prt.x, prt.y, prt.size, prt.size);
+    ctx.globalAlpha = 1;
+  }
+
+  // Popups
   for(const pop of state.popups){
     ctx.font='bold 12px system-ui';
     ctx.fillStyle='black'; ctx.fillText(pop.text, pop.x+1, pop.y+1);
     ctx.fillStyle='#fffb7a'; ctx.fillText(pop.text, pop.x, pop.y);
   }
 
+  ctx.restore();
+
   if(state.score===0){
     ctx.font='12px system-ui'; ctx.fillStyle='#a5a5ad';
-    ctx.fillText('Pegue CDs para subir o MULT. H para hitboxes.', 14, 20);
+    ctx.fillText('Pegue CDs para subir o MULT. H = hitboxes.', 14, 20);
   }
   if(!state.running){
     ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(0,0,cvs.width,cvs.height);
@@ -280,6 +313,8 @@ function render(){
     ctx.font='12px system-ui'; ctx.fillText('Pressione R para recomeçar.',165,130);
   }
 }
+
+function max(a,b){ return a>b?a:b; }
 
 function loop(ts){ const dt=Math.min(33,ts-last); last=ts; if(state.running){update(dt);render();requestAnimationFrame(loop);} else {render();} }
 requestAnimationFrame(ts=>{ last=ts; requestAnimationFrame(loop); });

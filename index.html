@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>BLISS — Skate Trick (v4)</title>
-  <meta name="description" content="Skate runner 2D com sprites, collectibles (CDs) e multiplicador de pontos.">
+  <title>BLISS — Skate Trick (v5)</title>
+  <meta name="description" content="Skate runner 2D com collectibles, multiplicador, partículas, shake e SFX.">
   <link rel="preload" as="image" href="assets/skater.png"/>
   <link rel="preload" as="image" href="assets/obstacles.png"/>
   <link rel="preload" as="image" href="assets/collectibles.png"/>
@@ -45,13 +45,18 @@
       <h2>Como jogar</h2>
       <p>PC: <b>Setas</b> ou <b>A/D</b> para mover, <b>Espaço/↑</b> para pular.<br>
          Mobile: toque no canvas para pular.</p>
-      <p>Pegue <b>CDs</b> para aumentar o <b>multiplicador</b> e marcar mais pontos. O mult reseta quando você bate.</p>
-      <p>Debug: pressione <b>H</b> para alternar hitboxes.</p>
+      <p>Pegue <b>CDs</b> para subir o <b>MULT</b>. Debug: <b>H</b> mostra hitboxes.</p>
       <button id="btn-close-help">Fechar</button>
     </section>
 
     <footer class="foot"><small>© BLISS</small></footer>
   </main>
+
+  <audio id="sfx-jump" src="assets/jump.wav" preload="auto"></audio>
+  <audio id="sfx-cd" src="assets/cd_pick.wav" preload="auto"></audio>
+  <audio id="sfx-cone" src="assets/hit_cone.wav" preload="auto"></audio>
+  <audio id="sfx-bag" src="assets/hit_bag.wav" preload="auto"></audio>
+  <audio id="sfx-bottle" src="assets/hit_bottle.wav" preload="auto"></audio>
 
   <script type="module" src="main.js"></script>
 </body>

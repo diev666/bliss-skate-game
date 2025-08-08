@@ -5,7 +5,7 @@
 html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter}
 #app{max-width:960px;margin:0 auto;padding:16px;display:grid;gap:12px}
 .topbar{display:flex;justify-content:space-between;align-items:center}
-h1{font-size:18px;margin:0;letter-spacing:0.5px;text-transform:uppercase}
+h1{font-size:18px;margin:0;text-transform:uppercase;letter-spacing:.5px}
 #game-wrap{display:grid;gap:10px}
 #game{width:100%;height:auto;aspect-ratio:16/9;display:block;background:#0b0b0d;border:1px solid var(--line);border-radius:14px;image-rendering:pixelated}
 #hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:center;font-weight:800;letter-spacing:.5px}
