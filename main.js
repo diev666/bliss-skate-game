@@ -13,6 +13,17 @@ const btnLB=$('#btn-leaderboard'), btnCloseLB=$('#btn-close-lb'), btnResetLB=$('
 const btnHelp=$('#btn-help'), helpEl=$('#help'), btnCloseHelp=$('#btn-close-help');
 const btnMute=$('#btn-mute');
 
+
+// ==== HITBOX CONFIG (ajustável) ====
+// Offsets relativos ao canto onde o sprite 32x32 é desenhado: (p.x, p.y-24)
+// Pense no corpo + shape do skate.
+const HB_OFFSET_X = 7;   // desloca para a direita
+const HB_OFFSET_Y = 10;  // desloca para baixo (em relação ao topo do sprite)
+// Tamanho da caixa (deixe um pouco menor que o sprite para não punir demais)
+const HB_WIDTH    = 14;
+const HB_HEIGHT   = 12;
+// ===================================
+
 // SFX
 const sfxJump = $('#sfx-jump');
 const sfxCD = $('#sfx-cd');
@@ -200,7 +211,7 @@ function update(dt){
   updateObstacles(dt); updateCDs(dt); updateParticles(dt);
 
   // colisão com obstáculos
-  const pb = { x:p.x+5, y:(p.y-24)+4, w:12, h:14 }; // hitbox maior que v4
+  const pb = { x: p.x + HB_OFFSET_X, y: (p.y - 24) + HB_OFFSET_Y, w: HB_WIDTH, h: HB_HEIGHT }; // hitbox maior que v4
   for(const o of state.obstacles){
     if(o.x>cvs.width || o.x+o.w<0) continue;
     const b=o.type.bbox; const bx=o.x+b.x, by=o.y+b.y;
@@ -275,7 +286,7 @@ function render(){
   if(imgSkater.complete){
     const sxp=(p.frame%3)*32, sy=0;
     ctx.drawImage(imgSkater, sxp, sy, 32,32, p.x, p.y-24, 32,32);
-    if(showHitbox){ ctx.strokeStyle='#0f0'; ctx.strokeRect(p.x+5,(p.y-24)+4,12,14); }
+    if(showHitbox){ ctx.strokeStyle='#0f0'; ctx.strokeRect(p.x + HB_OFFSET_X, (p.y - 24) + HB_OFFSET_Y, HB_WIDTH, HB_HEIGHT); }
   }
 
   // Obstáculos
