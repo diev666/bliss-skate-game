@@ -112,10 +112,11 @@ img.ground.src='assets/ground.png';
 img.sky.src='assets/skyline.png';
 
 /* ---------- Input ---------- */
-const input = {left:false,right:false,jump:false,justJump:false};
+const input = {left:false,right:false,jump:false,justJump:false,special:false};
 let lastSpaceTap=0;
 addEventListener('keydown',e=>{
   if(e.code==='ArrowLeft'||e.code==='KeyA') input.left=true;
+  if(e.code==='ControlLeft'||e.code==='ControlRight') input.special=true;
   if(e.code==='ArrowRight'||e.code==='KeyD') input.right=true;
   if(e.code==='Space'||e.code==='ArrowUp'){
     if(!input.jump) input.justJump=true;
@@ -137,6 +138,7 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{
   if(e.code==='ArrowLeft'||e.code==='KeyA') input.left=false;
   if(e.code==='ArrowRight'||e.code==='KeyD') input.right=false;
+  if(e.code==='ControlLeft'||e.code==='ControlRight') input.special=false;
   if(e.code==='Space'||e.code==='ArrowUp') input.jump=false;
 });
 
@@ -177,6 +179,12 @@ const state = { prevMode:null,
   // tricks/combo HUD persistente
   combo:0, uiCombo:0, uiTrick:null, usedKick:false, usedShove:false, airTime:0, jumpHold:0,
   trickAnim:0, trickPhase:0,
+  // Especial
+  special:0,            // 0..1
+  specialActive:false,
+  specialDrainPerSec:0.20,  // barra cheia dura ~5s
+  cdRespawnLock:0,      // ms após sair do especial
+
   showHit: opts.hit,
 };
 
@@ -238,6 +246,27 @@ function update(dt){
   if(state.mode!=='PLAY') return;
 
   const p = state.player;
+
+  // --- Especial (hold CTRL) ---
+  const wasActive = state.specialActive;
+  if(input.special && state.special>0){
+    state.specialActive = true;
+  } else {
+    state.specialActive = false;
+  }
+  // Drain/refill using real dt (not slowed)
+  const realDt = dt;
+  if(state.specialActive){
+    state.special = Math.max(0, state.special - state.specialDrainPerSec * (realDt/1000));
+    if(state.special===0){ state.specialActive=false; }
+  }
+  // On deactivate: start 5s lock for CD spawns
+  if(wasActive && !state.specialActive){ state.cdRespawnLock = Math.max(state.cdRespawnLock, 5000); }
+  if(state.cdRespawnLock>0){ state.cdRespawnLock = Math.max(0, state.cdRespawnLock - realDt); }
+
+  // Effective dt for gameplay (slow-mo 50%)
+  const dtEff = state.specialActive ? dt*0.5 : dt;
+
   // movement
   if(input.left) p.vx=-1.5; else if(input.right) p.vx=1.5; else p.vx=0;
 
@@ -250,7 +279,7 @@ function update(dt){
 
   // variable jump
   p.vy += GRAV;
-  if(state.jumpHold>0 && input.jump && !p.onGround){ p.vy += -0.18; state.jumpHold -= dt; }
+  if(state.jumpHold>0 && input.jump && !p.onGround){ p.vy += -0.18; state.jumpHold -= dtEff; }
 
   // apply
   p.x += p.vx; p.y += p.vy;
@@ -285,12 +314,12 @@ function update(dt){
   state.groundOffset = (state.groundOffset + speed) % cvs.width;
 
   // spawn
-  state.spawnCooldown -= dt; state.cdCooldown -= dt;
+  state.spawnCooldown -= dtEff; state.cdCooldown -= (state.specialActive ? 0 : dtEff);
   if(state.spawnCooldown<=0){
     spawnObstacle();
     state.spawnCooldown = (1000 - Math.min(500, Math.floor(state.score/10)*12)) / diffFactor;
   }
-  if(state.cdCooldown<=0){
+  if(state.cdCooldown<=0 && !state.specialActive && state.cdRespawnLock===0){
     spawnCD();
     state.cdCooldown = 1100 / diffFactor;
   }
@@ -313,15 +342,17 @@ function update(dt){
     if(!c.taken && circleRect(c.x,c.y,c.r, p.x,p.y-p.h,p.w,p.h)){
       c.taken=true; state.cdCount++; cdsEl.textContent=state.cdCount;
       state.mult = Math.min(4, state.mult + 0.1); multEl.textContent=`${state.mult.toFixed(1)}×`;
+      // Especial +10%
+      state.special = Math.min(1, state.special + 0.10);
       state.combo += 50; state.uiCombo = state.combo; state.uiTrick = 'CD';
       addPopup('+CD', c.x, c.y-10); playSFX(sfx.cd);
     }
   }
 
   // particles/popups cleanup
-  state.particles = state.particles.filter(pt=> (pt.life-=dt) > 0);
+  state.particles = state.particles.filter(pt=> (pt.life-=dtEff) > 0);
   state.particles.forEach(pt=>{ pt.x+=pt.vx; pt.y+=pt.vy; pt.vy+=0.02; });
-  state.popups = state.popups.filter(pu=> (pu.life-=dt) > 0); state.popups.forEach(pu=> pu.y += pu.vy);
+  state.popups = state.popups.filter(pu=> (pu.life-=dtEff) > 0); state.popups.forEach(pu=> pu.y += pu.vy);
 }
 
 function endRun(){
@@ -406,6 +437,20 @@ function render(){
   if(state.uiTrick){ ctx.fillStyle= '#fffb7a'; ctx.fillText(state.uiTrick, 14, 20); }
   if(state.uiCombo>0){ ctx.fillStyle='#fff'; ctx.fillText('COMBO: '+state.uiCombo, 14, 36); }
 
+
+  // SPECIAL bar
+  const pct = state.special;
+  const bw = 140, bh = 10;
+  const bx = Math.floor((cvs.width-bw)/2), by = 8;
+  ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(bx-1, by-1, bw+2, bh+2);
+  ctx.fillStyle='#2b2b36'; ctx.fillRect(bx, by, bw, bh);
+  ctx.fillStyle = state.specialActive ? '#7aff9d' : '#9d7bff';
+  ctx.fillRect(bx, by, Math.floor(bw*pct), bh);
+  ctx.font='10px system-ui'; ctx.fillStyle='#fff';
+  const label='ESPECIAL';
+  const lw = ctx.measureText(label).width;
+  ctx.fillText(label, Math.floor(bx + (bw-lw)/2), by+bh+10);
+
   ctx.restore();
 
 
@@ -489,7 +534,7 @@ function loop(ts){
   const dt = Math.min(33, ts-last); last=ts;
   // trick anim timer
   if(state.uiTrick==='KICKFLIP' || state.uiTrick==='SHOVE-IT'){
-    state.trickAnim += dt; if(state.trickAnim>110){ state.trickAnim=0; state.trickPhase = 1-state.trickPhase; }
+    state.trickAnim += dtEff; if(state.trickAnim>110){ state.trickAnim=0; state.trickPhase = 1-state.trickPhase; }
   }
   update(dt);
   render();
