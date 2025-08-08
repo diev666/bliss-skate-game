@@ -5,7 +5,7 @@
 
 // Safe DOM helpers
 function $(s){ return document.querySelector(s); }
-const VERSION='768'; const CB='?v='+VERSION; let assetErrors=[];
+const VERSION='769'; const CB='?v='+VERSION; let assetErrors=[];
 function on(el,ev,fn){ if(el && el.addEventListener) el.addEventListener(ev,fn); }
 
 // Canvas
@@ -214,7 +214,6 @@ function updatePopups(dt){ state.popups.forEach(p=>{p.y+=p.vy*dt;p.life-=dt}); s
 function endRun(hitType){
   state.running=false; state.shake=14; if(hitType&&hitType.sfx) hitType.sfx();
   if(state.score>state.best){state.best=state.score; if(bestEl) bestEl.textContent=state.best;
-state.showHit = opts.hit;
 // ====== GAME MODES ======
 // Modes: 'MENU', 'PLAY', 'PAUSE', 'HELP', 'OPTIONS', 'SKINS', 'CREDITS', 'GAMEOVER'
 state.mode = 'MENU';
