@@ -20,3 +20,6 @@ section#leaderboard,section#help{background:var(--panel);border:1px solid var(--
 #track{opacity:.85;margin-left:6px}
 #vol{width:160px;accent-color:var(--accent)}
 .foot{opacity:.7;text-align:center}
+
+
+/* Trick/Combo overlay drawn via canvas; helper style if needed later */

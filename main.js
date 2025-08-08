@@ -62,7 +62,7 @@ const HB_OFFSET_X=7, HB_OFFSET_Y=10, HB_WIDTH=14, HB_HEIGHT=12;
 const state={
   running:true,t:0,score:0,best:+(localStorage.getItem('bliss_skate_best')||0),
   mult:1,multTime:0, cdCount:0,
-  player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,anim:'roll',animTimer:0},
+  player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,anim:'roll',animTimer:0}, jumpHold:0,
   obstacles:[], cds:[], popups:[], particles:[],
   spawnCooldown:1000, cdCooldown:1200, speedBase:2.0,
   skyOffset:0, groundOffset:0, cdAnim:0, shake:0, showHit:false
@@ -161,7 +161,7 @@ function endRun(hitType){
 }
 function resetRun(){
   Object.assign(state,{running:true,t:0,score:0,mult:1,multTime:0,cdCount:0,
-    player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,anim:'roll',animTimer:0},
+    player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,anim:'roll',animTimer:0}, jumpHold:0,
     obstacles:[],cds:[],popups:[],particles:[],spawnCooldown:900,cdCooldown:1000,speedBase:2.0,skyOffset:0,groundOffset:0,cdAnim:0,shake:0
   });
   last=performance.now(); if(typeof requestAnimationFrame==='function') requestAnimationFrame(loop);
@@ -169,14 +169,18 @@ function resetRun(){
 }
 
 // Update principal
-let last=0;
+let last=0, lastDt=16;
 function update(dt){
   const p=state.player;
   // movimento
   p.vx+=(input.right-input.left)*SPEED; p.vx*=FRICTION; p.vy+=GRAV;
-  if(input.jump && p.onGround){ p.vy=JUMP; p.onGround=false; p.anim='ollie'; p.frame=1; p.animTimer=0; playSFX(sfxJump); addParticles(p.x+12,p.y-10,12,'#9d7bff'); }
+  if(input.jump && p.onGround){ p.vy=JUMP; p.onGround=false; p.anim='ollie'; p.frame=1; p.animTimer=0; state.jumpHold=180; playSFX(sfxJump); addParticles(p.x+12,p.y-10,12,'#9d7bff'); }
   p.x+=p.vx; p.y+=p.vy;
-  if(p.y>groundY){ p.y=groundY; p.vy=0; p.onGround=true; if(p.anim!=='roll'){p.anim='roll';p.frame=0;} }
+  if(!p.onGround){ state.airTime += dt; if(state.airTime>350 && state.trickNow!=='OLLIE'){ state.trickNow='OLLIE'; state.trickFlash=500; } }
+  if(p.y>groundY){ p.y=groundY; p.vy=0; if(!p.onGround){ // landing event
+      if(state.combo>0){ const gain = Math.floor(state.combo * state.mult); state.score += gain; addPopup(`COMBO +${gain}`, p.x, p.y-50); if(scoreEl) scoreEl.textContent=state.score; }
+      state.combo=0; state.usedKickflip=false; state.usedShove=false; state.trickNow=null; state.trickFlash=0; state.airTime=0; }
+    p.onGround=true; if(p.anim!=='roll'){p.anim='roll';p.frame=0;} }
   if(p.x<8) p.x=8; if(p.x>cvs.width-8-p.w) p.x=cvs.width-8-p.w;
   p.animTimer+=dt; if(p.anim==='ollie'){ p.frame=p.vy<-2?2:1; }
 
@@ -247,12 +251,18 @@ function render(){
   for(const prt of state.particles){ ctx.globalAlpha=Math.max(0,prt.life/900); ctx.fillStyle=prt.color; ctx.fillRect(prt.x,prt.y,prt.size,prt.size); ctx.globalAlpha=1; }
   // Popups
   for(const pop of state.popups){ ctx.font='bold 12px system-ui'; ctx.fillStyle='black'; ctx.fillText(pop.text,pop.x+1,pop.y+1); ctx.fillStyle='#fffb7a'; ctx.fillText(pop.text,pop.x,pop.y); }
+
+  // Trick/Combo overlay
+  ctx.font='bold 12px system-ui';
+  if(state.combo>0){ ctx.fillStyle='#fff'; ctx.fillText(`COMBO: ${state.combo}`, 14, 48); }
+  if(state.trickFlash>0 && state.trickNow){ ctx.fillStyle='#fffb7a'; ctx.fillText(state.trickNow, 14, 32); state.trickFlash -= lastDt; if(state.trickFlash<=0) state.trickNow=null; }
+
   ctx.restore();
   if(state.score===0){ ctx.font='12px system-ui'; ctx.fillStyle='#a5a5ad'; ctx.fillText('Pegue CDs para subir o MULT. H = hitboxes.',14,20); }
   if(!state.running){ ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(0,0,cvs.width,cvs.height); ctx.fillStyle='#fff'; ctx.font='16px system-ui'; ctx.fillText('Fim da corrida!',180,110); ctx.font='12px system-ui'; ctx.fillText('Pressione R para recomeçar.',165,130); }
 }
 
-function loop(ts){ const dt=Math.min(33, ts-last); last=ts; if(state.running){ update(dt); render(); if(typeof requestAnimationFrame==='function') requestAnimationFrame(loop); } else { render(); } }
+function loop(ts){ const dt=Math.min(33, ts-last); last=ts; lastDt=dt; if(state.running){ update(dt); render(); if(typeof requestAnimationFrame==='function') requestAnimationFrame(loop); } else { render(); } }
 if(typeof requestAnimationFrame==='function'){ requestAnimationFrame(ts=>{ last=ts; requestAnimationFrame(loop); }); }
 
 // ==== Music Player (playlist {file,title}) ====
@@ -291,3 +301,37 @@ if(musicEl){ musicEl.volume=0.30; }
 if(volEl){ volEl.value='0.30'; on(volEl,'input',()=>{ if(musicEl) musicEl.volume=parseFloat(volEl.value||'0.3'); }); }
 
 loadPlaylist();
+
+on(window,'keydown',e=>{
+  const p = state.player;
+  const now = performance.now?performance.now():Date.now();
+  // detect double-tap for kickflip (space/up)
+  if(['Space','ArrowUp'].includes(e.code)){
+    // rising-edge only matters; Our input already set jump=true; allow trick if in air and not used
+    if(!p.onGround && !state.usedKickflip){
+      if(now - state.lastJumpTap < 250){
+        state.trickNow = 'KICKFLIP';
+        state.usedKickflip = true;
+        state.combo += 150; // base trick points
+        state.trickFlash = 800; // ms
+        addPopup('KICKFLIP +150', p.x, p.y-40);
+        addParticles(p.x+12, p.y-10, 12, '#ffd36b');
+      }
+      state.lastJumpTap = now;
+    } else {
+      state.lastJumpTap = now;
+    }
+  }
+  // shove-it with lateral tap while airborne
+  if(['ArrowLeft','KeyA','ArrowRight','KeyD'].includes(e.code)){
+    if(!p.onGround && !state.usedShove){
+      state.trickNow = 'SHOVE-IT';
+      state.usedShove = true;
+      state.combo += 100;
+      state.trickFlash = 700;
+      addPopup('SHOVE-IT +100', p.x, p.y-40);
+      addParticles(p.x+12, p.y-12, 10, '#9d7bff');
+    }
+  }
+});
+
