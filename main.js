@@ -5,7 +5,7 @@
 
 // Safe DOM helpers
 function $(s){ return document.querySelector(s); }
-const VERSION='762'; const CB='?v='+VERSION; let assetErrors=[];
+const VERSION='763'; const CB='?v='+VERSION; let assetErrors=[];
 function on(el,ev,fn){ if(el && el.addEventListener) el.addEventListener(ev,fn); }
 
 // Canvas
@@ -24,6 +24,25 @@ const btnMuteSFX=$('#btn-mute-sfx');
 const musicEl=$('#music');
 const btnPrev=$('#prev'), btnPlay=$('#play'), btnNext=$('#next');
 const trackEl=$('#track'); const volEl=$('#vol'); const btnMuteMusic=$('#btn-mute-music');
+// ====== OPTIONS (init early)
+const OPTS_KEY='skate_bliss_opts';
+function loadOpts(){
+  try{
+    const o=JSON.parse(localStorage.getItem(OPTS_KEY)||'{}');
+    return { vol: (typeof o.vol==='number')? o.vol : 0.30,
+             sfx: (typeof o.sfx==='boolean')? o.sfx : false,
+             hit: (typeof o.hit==='boolean')? o.hit : false,
+             diff: (o.diff==='FAST'?'FAST':'NORMAL') };
+  } catch(_) { return {vol:0.30,sfx:false,hit:false,diff:'NORMAL'}; }
+}
+function saveOpts(){ try{ localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); }catch(_){} }
+const opts = loadOpts();
+if(musicEl){ musicEl.volume = opts.vol; }
+if(volEl){ try{ volEl.value = String(opts.vol.toFixed(2)); }catch(_){} }
+let sfxMuted = opts.sfx; if(btnMuteSFX){ btnMuteSFX.textContent = sfxMuted?'🔇 SFX':'🔈 SFX'; }
+let diffFactor = (opts.diff==='FAST')?1.25:1.0;
+state.showHit = opts.hit;
+
 
 // SFX
 const sfxJump = $('#sfx-jump'), sfxCD=$('#sfx-cd'), sfxCone=$('#sfx-cone'), sfxBag=$('#sfx-bag'), sfxBottle=$('#sfx-bottle');
@@ -71,46 +90,12 @@ const state={
 };
 if(bestEl) bestEl.textContent=state.best;
 // ====== GAME MODES ======
-// Modes: 'MENU', 'PLAY', 'PAUSE', 'HELP', 'OPTIONS', 'SKINS', 'CREDITS', 'GAMEOVER'
-state.mode = 'MENU';
-state.fade = 0; // for transitions
-// Options persisted
-const OPTS_KEY = 'skate_bliss_opts';
-function loadOpts(){
-  try{
-    const o = JSON.parse(localStorage.getItem(OPTS_KEY)||'{}');
-    return {
-      vol: typeof o.vol==='number'? o.vol : 0.30,
-      sfx: typeof o.sfx==='boolean'? o.sfx : false,
-      hit: typeof o.hit==='boolean'? o.hit : false,
-      diff: (o.diff==='FAST'?'FAST':'NORMAL')
-    };
-  }catch(_){ return {vol:0.30,sfx:false,hit:false,diff:'NORMAL'}; }
-}
-function saveOpts(){ localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); }
-const opts = loadOpts();
-// apply opts to current session
-if(musicEl){ musicEl.volume = opts.vol; }
-if(volEl){ volEl.value = String(opts.vol.toFixed(2)); }
-sfxMuted = opts.sfx;
-state.showHit = opts.hit;
-let diffFactor = (opts.diff==='FAST') ? 1.25 : 1.0;
-
-// Menu navigation
-let menuIndex = 0;
-const MENU_ITEMS = ['JOGAR','COMO JOGAR','OPÇÕES','SKINS','CRÉDITOS'];
-let pauseIndex = 0;
-const PAUSE_ITEMS = ['RETOMAR','REINICIAR','MENU'];
-let overIndex = 0;
-const OVER_ITEMS = ['REINICIAR','MENU'];
-
-// Options navigation
-let optIndex = 0;
-const OPT_ITEMS = ['VOLUME','SFX','HITBOXES','DIFICULDADE','VOLTAR'];
-
-// Skins placeholder
-let skinIndex = 0;
-const SKINS = ['Default']; // placeholder for future unlocks
+state.mode='MENU'; state.fade=0;
+let menuIndex=0; const MENU_ITEMS=['JOGAR','COMO JOGAR','OPÇÕES','SKINS','CRÉDITOS'];
+let pauseIndex=0; const PAUSE_ITEMS=['RETOMAR','REINICIAR','MENU'];
+let overIndex=0; const OVER_ITEMS=['REINICIAR','MENU'];
+let optIndex=0; const OPT_ITEMS=['VOLUME','SFX','HITBOXES','DIFICULDADE','VOLTAR'];
+let skinIndex=0; const SKINS=['Default']; // placeholder for future unlocks
 
 // Fade helpers
 function startFade(){ state.fade = 1.0; }
@@ -207,46 +192,12 @@ function endRun(hitType){
   state.running=false; state.shake=14; if(hitType&&hitType.sfx) hitType.sfx();
   if(state.score>state.best){state.best=state.score; if(bestEl) bestEl.textContent=state.best;
 // ====== GAME MODES ======
-// Modes: 'MENU', 'PLAY', 'PAUSE', 'HELP', 'OPTIONS', 'SKINS', 'CREDITS', 'GAMEOVER'
-state.mode = 'MENU';
-state.fade = 0; // for transitions
-// Options persisted
-const OPTS_KEY = 'skate_bliss_opts';
-function loadOpts(){
-  try{
-    const o = JSON.parse(localStorage.getItem(OPTS_KEY)||'{}');
-    return {
-      vol: typeof o.vol==='number'? o.vol : 0.30,
-      sfx: typeof o.sfx==='boolean'? o.sfx : false,
-      hit: typeof o.hit==='boolean'? o.hit : false,
-      diff: (o.diff==='FAST'?'FAST':'NORMAL')
-    };
-  }catch(_){ return {vol:0.30,sfx:false,hit:false,diff:'NORMAL'}; }
-}
-function saveOpts(){ localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); }
-const opts = loadOpts();
-// apply opts to current session
-if(musicEl){ musicEl.volume = opts.vol; }
-if(volEl){ volEl.value = String(opts.vol.toFixed(2)); }
-sfxMuted = opts.sfx;
-state.showHit = opts.hit;
-let diffFactor = (opts.diff==='FAST') ? 1.25 : 1.0;
-
-// Menu navigation
-let menuIndex = 0;
-const MENU_ITEMS = ['JOGAR','COMO JOGAR','OPÇÕES','SKINS','CRÉDITOS'];
-let pauseIndex = 0;
-const PAUSE_ITEMS = ['RETOMAR','REINICIAR','MENU'];
-let overIndex = 0;
-const OVER_ITEMS = ['REINICIAR','MENU'];
-
-// Options navigation
-let optIndex = 0;
-const OPT_ITEMS = ['VOLUME','SFX','HITBOXES','DIFICULDADE','VOLTAR'];
-
-// Skins placeholder
-let skinIndex = 0;
-const SKINS = ['Default']; // placeholder for future unlocks
+state.mode='MENU'; state.fade=0;
+let menuIndex=0; const MENU_ITEMS=['JOGAR','COMO JOGAR','OPÇÕES','SKINS','CRÉDITOS'];
+let pauseIndex=0; const PAUSE_ITEMS=['RETOMAR','REINICIAR','MENU'];
+let overIndex=0; const OVER_ITEMS=['REINICIAR','MENU'];
+let optIndex=0; const OPT_ITEMS=['VOLUME','SFX','HITBOXES','DIFICULDADE','VOLTAR'];
+let skinIndex=0; const SKINS=['Default']; // placeholder for future unlocks
 
 // Fade helpers
 function startFade(){ state.fade = 1.0; }
