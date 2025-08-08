@@ -8,7 +8,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 h1{font-size:18px;margin:0;text-transform:uppercase;letter-spacing:.5px}
 #game-wrap{display:grid;gap:10px}
 #game{width:100%;height:auto;aspect-ratio:16/9;display:block;background:#0b0b0d;border:1px solid var(--line);border-radius:14px;image-rendering:pixelated}
-#hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:center;font-weight:800;letter-spacing:.5px}
+#hud{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:center;font-weight:800;letter-spacing:.5px}
 .stat{background:var(--panel);border:1px solid var(--line);padding:8px 10px;border-radius:10px;text-align:center;text-shadow:0 1px 0 rgba(0,0,0,.5)}
 .stat:nth-child(3){color:var(--punk)}
 button{background:transparent;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
@@ -16,10 +16,6 @@ button:hover{border-color:var(--accent)}
 section#leaderboard,section#help{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
 #lb-list{margin:0 0 10px 22px}
 .lb-actions{display:flex;gap:8px;justify-content:flex-end}
+#player .player-wrap{display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+#player #vol{width:160px; accent-color:var(--accent)}
 .foot{opacity:.7;text-align:center}
-
-/* Music player */
-#player .player-wrap{ display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:8px 10px; }
-#player button{ background:transparent; border:1px solid var(--line); color:var(--ink); padding:6px 10px; border-radius:10px; cursor:pointer }
-#player button:hover{ border-color:var(--accent) }
-#track{ opacity:.85; margin-left:6px }

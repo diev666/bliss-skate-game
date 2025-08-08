@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>BLISS — Skate Trick (v6.2)</title>
-  <meta name="description" content="Skate runner 2D com CDs, multiplicador, partículas, shake, SFX e trilha.">
+  <title>BLISS — Skate Trick (v7)</title>
+  <meta name="description" content="Skate runner 2D com CDs, multiplicador, partículas, shake, SFX e trilha com volume.">
   <link rel="preload" as="image" href="assets/skater.png"/>
   <link rel="preload" as="image" href="assets/obstacles.png"/>
   <link rel="preload" as="image" href="assets/collectibles.png"/>
@@ -29,6 +29,7 @@
         <div class="stat">Recorde: <span id="best">0</span></div>
         <div class="stat">MULT: <span id="mult">1.0×</span></div>
         <div class="stat">CDs: <span id="cds">0</span></div>
+        <div class="stat"><button id="btn-leaderboard">Ranking</button></div>
       </div>
     </section>
 
@@ -55,6 +56,7 @@
         <button id="play">▶</button>
         <button id="next">⏭</button>
         <span id="track">Trilha parada</span>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.30" title="Volume"/>
         <button id="btn-mute-music">🔊 Música</button>
       </div>
     </section>
@@ -72,6 +74,6 @@
   <!-- Música -->
   <audio id="music" preload="auto" crossorigin="anonymous"></audio>
 
-  <script type="module" src="main.js?v=612"></script>
+  <script type="module" src="main.js?v=700"></script>
 </body>
 </html>
