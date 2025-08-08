@@ -41,14 +41,12 @@ if(musicEl){ musicEl.volume = opts.vol; }
 if(volEl){ try{ volEl.value = String(opts.vol.toFixed(2)); }catch(_){} }
 let sfxMuted = opts.sfx; if(btnMuteSFX){ btnMuteSFX.textContent = sfxMuted?'🔇 SFX':'🔈 SFX'; }
 let diffFactor = (opts.diff==='FAST')?1.25:1.0;
-state.showHit = opts.hit;
-
-
 // SFX
 const sfxJump = $('#sfx-jump'), sfxCD=$('#sfx-cd'), sfxCone=$('#sfx-cone'), sfxBag=$('#sfx-bag'), sfxBottle=$('#sfx-bottle');
-let sfxMuted=opts.sfx; if(btnMuteSFX){ btnMuteSFX.textContent=sfxMuted?'🔇 SFX':'🔈 SFX'; }
- on(btnMuteSFX,'click',()=>{ sfxMuted=!sfxMuted; if(btnMuteSFX) btnMuteSFX.textContent=sfxMuted?'🔇 SFX':'🔈 SFX'; opts.sfx=sfxMuted; saveOpts(); });
-function playSFX(a){ if(!sfxMuted && a){ try{ a.currentTime=0; a.play(); }catch(_){} }}
+let sfxMuted = opts.sfx;
+if(btnMuteSFX){ btnMuteSFX.textContent = sfxMuted ? '🔇 SFX' : '🔈 SFX'; }
+on(btnMuteSFX,'click',()=>{ sfxMuted = !sfxMuted; if(btnMuteSFX) btnMuteSFX.textContent = sfxMuted ? '🔇 SFX' : '🔈 SFX'; opts.sfx = sfxMuted; saveOpts(); });
+function playSFX(a){ if(!sfxMuted && a){ try{ a.currentTime=0; a.play(); }catch(_){ } }}
 
 // Assets
 const imgSkater=new Image(); imgSkater.onerror=()=>assetErrors.push('skater.png'); imgSkater.src='assets/skater.png'+CB;
@@ -88,6 +86,8 @@ const state={
   spawnCooldown:1000, cdCooldown:1200, speedBase:2.0,
   skyOffset:0, groundOffset:0, cdAnim:0, shake:0, showHit:false
 };
+state.showHit = opts.hit;
+
 if(bestEl) bestEl.textContent=state.best;
 // ====== GAME MODES ======
 state.mode='MENU'; state.fade=0;
@@ -99,7 +99,7 @@ let skinIndex=0; const SKINS=['Default']; // placeholder for future unlocks
 
 // Fade helpers
 function startFade(){ state.fade = 1.0; }
-function drawFade(){ if(state.fade>0){ ctx.fillStyle='rgba(0,0,0,'+Math.min(0.4,state.fade)+')'; ctx.fillRect(0,0,cvs.width,cvs.height); state.fade -= 0.02; } }
+function drawFade(){ if(state.fade>0){ ctx.fillStyle='rgba(0,0,0,'+Math.min(0.4,state.fade)+')'; ctx.fillRect(0,0,cvs.width,cvs.height); state.fade -= 0.02; } } }
 
 // Credits data
 const CREDITS = ['Skate Bliss','—','BLISS','DIEV','dievbliss.com'];
