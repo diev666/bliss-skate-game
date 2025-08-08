@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>BLISS — Skate Trick (v3)</title>
-  <meta name="description" content="Skate runner 2D com sprites, obstáculos distintos e colisões ajustadas.">
+  <title>BLISS — Skate Trick (v4)</title>
+  <meta name="description" content="Skate runner 2D com sprites, collectibles (CDs) e multiplicador de pontos.">
   <link rel="preload" as="image" href="assets/skater.png"/>
   <link rel="preload" as="image" href="assets/obstacles.png"/>
+  <link rel="preload" as="image" href="assets/collectibles.png"/>
   <link rel="preload" as="image" href="assets/ground.png"/>
   <link rel="preload" as="image" href="assets/skyline.png"/>
   <link rel="stylesheet" href="style.css"/>
@@ -26,6 +27,7 @@
       <div id="hud">
         <div class="stat">Pontuação: <span id="score">0</span></div>
         <div class="stat">Recorde: <span id="best">0</span></div>
+        <div class="stat">MULT: <span id="mult">1.0×</span></div>
         <div class="stat"><button id="btn-leaderboard">Ranking</button></div>
       </div>
     </section>
@@ -43,6 +45,7 @@
       <h2>Como jogar</h2>
       <p>PC: <b>Setas</b> ou <b>A/D</b> para mover, <b>Espaço/↑</b> para pular.<br>
          Mobile: toque no canvas para pular.</p>
+      <p>Pegue <b>CDs</b> para aumentar o <b>multiplicador</b> e marcar mais pontos. O mult reseta quando você bate.</p>
       <p>Debug: pressione <b>H</b> para alternar hitboxes.</p>
       <button id="btn-close-help">Fechar</button>
     </section>
