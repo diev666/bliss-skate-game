@@ -5,7 +5,7 @@
 
 // Safe DOM helpers
 function $(s){ return document.querySelector(s); }
-const VERSION='767'; const CB='?v='+VERSION; let assetErrors=[];
+const VERSION='768'; const CB='?v='+VERSION; let assetErrors=[];
 function on(el,ev,fn){ if(el && el.addEventListener) el.addEventListener(ev,fn); }
 
 // Canvas
@@ -102,7 +102,7 @@ if(musicEl){ musicEl.volume = opts.vol; }
 if(volEl){ volEl.value = String(opts.vol.toFixed(2)); }
 sfxMuted = opts.sfx;
 
-let diffFactor = (opts.diff==='FAST') ? 1.25 : 1.0;
+diffFactor = (opts.diff==='FAST') ? 1.25 : 1.0;
 
 // Menu navigation
 let menuIndex = 0;
@@ -237,7 +237,7 @@ if(musicEl){ musicEl.volume = opts.vol; }
 if(volEl){ volEl.value = String(opts.vol.toFixed(2)); }
 sfxMuted = opts.sfx;
 
-let diffFactor = (opts.diff==='FAST') ? 1.25 : 1.0;
+diffFactor = (opts.diff==='FAST') ? 1.25 : 1.0;
 
 // Menu navigation
 let menuIndex = 0;
