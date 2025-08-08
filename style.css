@@ -1,25 +1,27 @@
+
 :root{
-  --bg:#0e0e10; --panel:#141418; --ink:#f3f3f3; --muted:#a5a5ad; --line:#23232a; --accent:#9d7bff; --punk:#fffb7a;
+  --bg:#101012;
+  --ink:#e7e7ee;
+  --ink-d:#a5a5ad;
+  --panel:#17171b;
+  --panel-2:#0c0c10;
+  --accent:#fffb7a;
+  --brand:#9d7bff;
+  --radius:14px;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter}
-#app{max-width:960px;margin:0 auto;padding:16px;display:grid;gap:12px}
-.topbar{display:flex;justify-content:space-between;align-items:center}
-h1{font-size:18px;margin:0;text-transform:uppercase;letter-spacing:.5px}
-#game-wrap{display:grid;gap:10px}
-#game{width:100%;height:auto;aspect-ratio:16/9;display:block;background:#0b0b0d;border:1px solid var(--line);border-radius:14px;image-rendering:pixelated}
-#hud{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:center;font-weight:800;letter-spacing:.5px}
-.stat{background:var(--panel);border:1px solid var(--line);padding:8px 10px;border-radius:10px;text-align:center;text-shadow:0 1px 0 rgba(0,0,0,.5)}
-.stat:nth-child(3){color:var(--punk)}
-button{background:transparent;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
-button:hover{border-color:var(--accent)}
-section#leaderboard,section#help{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-#lb-list{margin:0 0 10px 22px}
-.lb-actions{display:flex;gap:8px;justify-content:flex-end}
-#player .player-wrap{display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
-#track{opacity:.85;margin-left:6px}
-#vol{width:160px;accent-color:var(--accent)}
-.foot{opacity:.7;text-align:center}
-
-
-/* Trick/Combo overlay drawn via canvas; helper style if needed later */
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui, -apple-system, Segoe UI, Roboto, Inter}
+#app{display:grid;place-items:start center;padding:18px}
+.topbar{display:flex;gap:10px;justify-content:space-between;align-items:center;width:100%;max-width:860px}
+.topbar h1{font-size:14px;letter-spacing:.6px;margin:0}
+.topbar .controls button{background:#14141a;border:1px solid #202028;padding:6px 10px;border-radius:10px;color:var(--ink);cursor:pointer}
+#game-wrap{width:100%;max-width:860px}
+#game{width:100%;aspect-ratio:16/9;background:#000;border-radius:16px;border:1px solid #262630}
+#hud{display:flex;gap:12px;margin-top:14px}
+#hud .stat{background:#14141a;border:1px solid #24242e;padding:8px 12px;border-radius:12px}
+#hud #btn-lb{margin-left:auto;background:#14141a;border:1px solid #24242e;padding:8px 12px;border-radius:12px;color:var(--ink)}
+#player-bar{display:flex;align-items:center;gap:10px;margin-top:10px;background:#14141a;border:1px solid #24242e;border-radius:12px;padding:10px}
+#player-bar button{background:#1a1a22;border:1px solid #2a2a38;color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer}
+#player-bar #track{color:var(--ink-d)}
+#player-bar #vol{flex:1}
+#foot{margin:10px auto;text-align:center;color:#8a8a95;font-size:12px}
