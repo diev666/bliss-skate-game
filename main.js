@@ -125,7 +125,13 @@ addEventListener('keydown',e=>{
     lastSpaceTap=now;
   }
   if(e.code==='KeyP'||e.code==='Escape'){
-    if(state.mode==='PLAY'){ state.mode='PAUSE'; } else if(state.mode==='PAUSE'){ state.mode='PLAY'; }
+    if(state.mode==='PLAY'){
+      state.prevMode='PLAY'; state.mode='MENU';
+    } else if(state.mode==='MENU' && state.prevMode==='PLAY'){
+      state.mode='PLAY'; state.prevMode=null;
+    } else if(state.mode==='PAUSE'){
+      state.mode='PLAY';
+    }
   }
 });
 addEventListener('keyup',e=>{
@@ -155,7 +161,7 @@ const groundY = 230;
 const GRAV = 0.45;
 const JUMP = -7.6;
 
-const state = {
+const state = { prevMode:null,
   mode:'MENU',
   running:false,
   t:0,
@@ -404,7 +410,7 @@ function render(){
 
 
   if(state.mode==='MENU'){ 
-    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    (state.prevMode==='PLAY' || state.running)? ctx.fillStyle='rgba(0,0,0,.60)' : ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
     drawCentered('Skate Bliss', 80, '#fff', 18);
     ctx.font='12px system-ui'; ctx.fillStyle='#a5a5ad'; drawCentered('↑/↓ navega  •  Enter seleciona', 100, '#a5a5ad', 12);
     for(let i=0;i<MENU_MAIN.length;i++){
@@ -416,7 +422,7 @@ function render(){
     }
   }
   if(state.mode==='OPTIONS'){ 
-    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    (state.prevMode==='PLAY' || state.running)? ctx.fillStyle='rgba(0,0,0,.60)' : ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
     drawCentered('Opções', 80, '#fff', 18);
     const items = [
       `MÚSICA: ${musicEl.muted?'OFF':'ON'}`,
@@ -436,7 +442,7 @@ function render(){
     ctx.fillStyle='#a5a5ad'; drawCentered('←/→ alterna  •  Enter alterna  •  ESC volta', 220, '#a5a5ad', 12);
   }
   if(state.mode==='HELP'){ 
-    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    (state.prevMode==='PLAY' || state.running)? ctx.fillStyle='rgba(0,0,0,.60)' : ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
     drawCentered('Como jogar', 80, '#fff', 18);
     ctx.font='12px system-ui'; ctx.fillStyle='#ddd';
     const lines=[
@@ -447,7 +453,7 @@ function render(){
     drawCentered('ESC para voltar', 220, '#a5a5ad', 12);
   }
   if(state.mode==='CREDITS'){ 
-    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    (state.prevMode==='PLAY' || state.running)? ctx.fillStyle='rgba(0,0,0,.60)' : ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
     drawCentered('Créditos', 80, '#fff', 18);
     ['BLISS','DIEV','dievbliss.com'].forEach((t,i)=> drawCentered(t, 120+i*18, '#ddd', 12));
     drawCentered('ESC para voltar', 220, '#a5a5ad', 12);
@@ -501,7 +507,7 @@ addEventListener('keydown',e=>{
     if(e.code==='ArrowUp'||e.code==='KeyW') menuIndex=(menuIndex-1+MENU_MAIN.length)%MENU_MAIN.length;
     if(e.code==='Enter'){
       const pick=MENU_MAIN[menuIndex];
-      if(pick==='JOGAR'){ resetRun(); }
+      if(pick==='JOGAR'){ if(state.prevMode==='PLAY'){ state.mode='PLAY'; state.prevMode=null; } else { resetRun(); } }
       else if(pick==='OPÇÕES'){ state.mode='OPTIONS'; }
       else if(pick==='COMO JOGAR'){ state.mode='HELP'; }
       else if(pick==='CRÉDITOS'){ state.mode='CREDITS'; }
@@ -528,3 +534,5 @@ addEventListener('keydown',e=>{
 });
 
 addEventListener('keydown',e=>{ if(e.code==='Escape' && state.mode==='GAMEOVER'){ state.mode='MENU'; } });
+
+addEventListener('keydown',e=>{ if(e.code==='Escape' && state.mode==='MENU' && state.prevMode==='PLAY'){ state.mode='PLAY'; state.prevMode=null; } });
