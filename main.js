@@ -7,11 +7,16 @@
 const cvs = document.getElementById('game');
 const ctx = cvs.getContext('2d',{alpha:false});
 const $ = s => document.querySelector(s);
-const scoreEl=$('#score'), bestEl=$('#best'), multEl=$('#mult');
+const scoreEl=$('#score'), bestEl=$('#best'), multEl=$('#mult'), cdsEl=$('#cds');
 const lbEl=$('#leaderboard'), lbList=$('#lb-list');
 const btnLB=$('#btn-leaderboard'), btnCloseLB=$('#btn-close-lb'), btnResetLB=$('#btn-reset-lb');
 const btnHelp=$('#btn-help'), helpEl=$('#help'), btnCloseHelp=$('#btn-close-help');
-const btnMute=$('#btn-mute');
+const btnMuteSFX=$('#btn-mute-sfx');
+// Music controls
+const musicEl=$('#music');
+const btnPrev=$('#prev'), btnPlay=$('#play'), btnNext=$('#next');
+const trackEl=$('#track');
+const btnMuteMusic=$('#btn-mute-music');
 
 
 // ==== HITBOX CONFIG (ajustável) ====
@@ -31,7 +36,7 @@ const sfxCone = $('#sfx-cone');
 const sfxBag = $('#sfx-bag');
 const sfxBottle = $('#sfx-bottle');
 
-let muted=false; btnMute.addEventListener('click',()=>{muted=!muted;btnMute.textContent=muted?'🔇':'🔈'});
+let muted=false; btnMuteSFX.addEventListener('click',()=>{muted=!muted;btnMuteSFX.textContent=muted?'🔇 SFX':'🔈 SFX'});
 function play(s){ if(!muted){ try{ s.currentTime=0; s.play(); }catch(e){} } }
 
 // Assets
@@ -68,7 +73,7 @@ const state = {
   running:true,t:0,score:0,best:+(localStorage.getItem('bliss_skate_best')||0),
   mult:1, multTime:0,
   player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,animTimer:0,anim:'roll'}, // hitbox maior
-  obstacles:[], cds:[], popups:[], particles:[],
+  obstacles:[], cds:[], popups:[], particles:[], cdCount:0, cdCount:0,
   spawnCooldown: 1000, cdCooldown: 1200,
   speedBase: 2.0,
   skyOffset:0, groundOffset:0, cdAnim:0,
@@ -178,7 +183,7 @@ function resetRun(){
   Object.assign(state,{
     running:true,t:0,score:0,mult:1,multTime:0,
     player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,animTimer:0,anim:'roll'},
-    obstacles:[], cds:[], popups:[], particles:[],
+    obstacles:[], cds:[], popups:[], particles:[], cdCount:0, cdCount:0,
     spawnCooldown:900, cdCooldown:1000, speedBase:2.0, skyOffset:0, groundOffset:0, cdAnim:0, shake:0
   });
   last=performance.now(); requestAnimationFrame(loop);
@@ -228,6 +233,7 @@ function update(dt){
     if(aabb(pb.x,pb.y,pb.w,pb.h,cb.x,cb.y,cb.w,cb.h)){
       state.cds.splice(i,1);
       play(sfxCD); addParticles(c.x+8, c.y+8, 14, '#fffb7a');
+      state.cdCount++; cdsEl.textContent = state.cdCount;
       state.mult = Math.min(5, +(state.mult + 1).toFixed(1));
       state.multTime = 0;
       const bonus = 10 * state.mult;
@@ -328,4 +334,71 @@ function render(){
 function max(a,b){ return a>b?a:b; }
 
 function loop(ts){ const dt=Math.min(33,ts-last); last=ts; if(state.running){update(dt);render();requestAnimationFrame(loop);} else {render();} }
+
+// ==== Simple Music Player (playlist.json in assets/music/) ====
+let playlist = [];
+let current = 0;
+let musicMuted = false;
+
+async function loadPlaylist(){
+  try{
+    const res = await fetch('assets/music/playlist.json', {cache:'no-store'});
+    if(res.ok){
+      playlist = await res.json();
+    } else {
+      playlist = [];
+    }
+  }catch(e){ playlist = []; }
+  if(playlist.length){
+    current = 0;
+    musicEl.src = 'assets/music/' + encodeURIComponent(playlist[current]);
+    trackEl.textContent = playlist[current];
+  } else {
+    trackEl.textContent = 'Sem músicas na pasta (assets/music)';
+  }
+}
+function playMusic(){
+  if(!playlist.length) return;
+  musicEl.play();
+  btnPlay.textContent = '⏸';
+}
+function pauseMusic(){
+  musicEl.pause();
+  btnPlay.textContent = '▶';
+}
+btnPlay.addEventListener('click', ()=>{
+  if(!playlist.length){ return; }
+  if(musicEl.paused) playMusic(); else pauseMusic();
+});
+btnPrev.addEventListener('click', ()=>{
+  if(!playlist.length) return;
+  current = (current-1+playlist.length)%playlist.length;
+  musicEl.src = 'assets/music/' + encodeURIComponent(playlist[current]);
+  trackEl.textContent = playlist[current];
+  playMusic();
+});
+btnNext.addEventListener('click', ()=>{
+  if(!playlist.length) return;
+  current = (current+1)%playlist.length;
+  musicEl.src = 'assets/music/' + encodeURIComponent(playlist[current]);
+  trackEl.textContent = playlist[current];
+  playMusic();
+});
+musicEl.addEventListener('ended', ()=>{
+  // auto-next
+  if(!playlist.length) return;
+  current = (current+1)%playlist.length;
+  musicEl.src = 'assets/music/' + encodeURIComponent(playlist[current]);
+  trackEl.textContent = playlist[current];
+  playMusic();
+});
+btnMuteMusic.addEventListener('click', ()=>{
+  musicMuted = !musicMuted;
+  musicEl.muted = musicMuted;
+  btnMuteMusic.textContent = musicMuted ? '🔈 Música' : '🔊 Música';
+});
+
+// Load on start
+loadPlaylist();
+
 requestAnimationFrame(ts=>{ last=ts; requestAnimationFrame(loop); });

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>BLISS — Skate Trick (v5)</title>
-  <meta name="description" content="Skate runner 2D com collectibles, multiplicador, partículas, shake e SFX.">
+  <title>BLISS — Skate Trick (v6)</title>
+  <meta name="description" content="Skate runner 2D com CDs, multiplicador, partículas, shake, SFX e trilha.">
   <link rel="preload" as="image" href="assets/skater.png"/>
   <link rel="preload" as="image" href="assets/obstacles.png"/>
   <link rel="preload" as="image" href="assets/collectibles.png"/>
@@ -18,7 +18,7 @@
       <h1>BLISS — Skate Trick</h1>
       <div class="controls">
         <button id="btn-help" aria-label="Ajuda">?</button>
-        <button id="btn-mute" aria-label="Áudio">🔈</button>
+        <button id="btn-mute-sfx" aria-label="SFX">🔈 SFX</button>
       </div>
     </header>
 
@@ -28,7 +28,7 @@
         <div class="stat">Pontuação: <span id="score">0</span></div>
         <div class="stat">Recorde: <span id="best">0</span></div>
         <div class="stat">MULT: <span id="mult">1.0×</span></div>
-        <div class="stat"><button id="btn-leaderboard">Ranking</button></div>
+        <div class="stat">CDs: <span id="cds">0</span></div>
       </div>
     </section>
 
@@ -49,14 +49,28 @@
       <button id="btn-close-help">Fechar</button>
     </section>
 
+    <section id="player">
+      <div class="player-wrap">
+        <button id="prev">⏮</button>
+        <button id="play">▶</button>
+        <button id="next">⏭</button>
+        <span id="track">Trilha parada</span>
+        <button id="btn-mute-music">🔊 Música</button>
+      </div>
+    </section>
+
     <footer class="foot"><small>© BLISS</small></footer>
   </main>
 
+  <!-- SFX -->
   <audio id="sfx-jump" src="assets/jump.wav" preload="auto"></audio>
   <audio id="sfx-cd" src="assets/cd_pick.wav" preload="auto"></audio>
   <audio id="sfx-cone" src="assets/hit_cone.wav" preload="auto"></audio>
   <audio id="sfx-bag" src="assets/hit_bag.wav" preload="auto"></audio>
   <audio id="sfx-bottle" src="assets/hit_bottle.wav" preload="auto"></audio>
+
+  <!-- Música -->
+  <audio id="music" preload="auto" crossorigin="anonymous"></audio>
 
   <script type="module" src="main.js"></script>
 </body>
