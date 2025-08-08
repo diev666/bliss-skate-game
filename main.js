@@ -160,7 +160,7 @@ function endRun(hitType){
   renderLB(); if(lbEl) lbEl.hidden=false;
 }
 function resetRun(){
-  Object.assign(state,{running:true,t:0,score:0,mult:1,multTime:0,cdCount:0,
+  Object.assign(state,{running:true,t:0,score:0,mult:1,multTime:0,cdCount:0, uiTrick:null, uiCombo:0, uiLive:false,
     player:{x:60,y:groundY,vx:0,vy:0,w:22,h:18,onGround:true,frame:0,anim:'roll',animTimer:0}, jumpHold:0,
     obstacles:[],cds:[],popups:[],particles:[],spawnCooldown:900,cdCooldown:1000,speedBase:2.0,skyOffset:0,groundOffset:0,cdAnim:0,shake:0
   });
@@ -179,6 +179,8 @@ function update(dt){
   if(!p.onGround){ state.airTime += dt; if(state.airTime>350 && state.trickNow!=='OLLIE'){ state.trickNow='OLLIE'; state.trickFlash=500; } }
   if(p.y>groundY){ p.y=groundY; p.vy=0; if(!p.onGround){ // landing event
       if(state.combo>0){ const gain = Math.floor(state.combo * state.mult); state.score += gain; addPopup(`COMBO +${gain}`, p.x, p.y-50); if(scoreEl) scoreEl.textContent=state.score; }
+      // freeze last shown trick/combo until next trick/combo
+      state.uiLive = false;
       state.combo=0; state.usedKickflip=false; state.usedShove=false; state.trickNow=null; state.trickFlash=0; state.airTime=0; }
     p.onGround=true; if(p.anim!=='roll'){p.anim='roll';p.frame=0;} }
   if(p.x<8) p.x=8; if(p.x>cvs.width-8-p.w) p.x=cvs.width-8-p.w;
@@ -319,6 +321,7 @@ on(window,'keydown',e=>{
         state.trickNow = 'KICKFLIP';
         state.usedKickflip = true;
         state.combo += 150; // base trick points
+        state.uiCombo = state.combo; state.uiLive = true;
         state.trickFlash = 1600; // ms
         addPopup('KICKFLIP +150', p.x, p.y-40);
         addParticles(p.x+12, p.y-10, 12, '#ffd36b');
@@ -334,6 +337,7 @@ on(window,'keydown',e=>{
       state.trickNow = 'SHOVE-IT';
       state.usedShove = true;
       state.combo += 100;
+      state.uiCombo = state.combo; state.uiLive = true;
       state.trickFlash = 1400;
       addPopup('SHOVE-IT +100', p.x, p.y-40);
       addParticles(p.x+12, p.y-12, 10, '#9d7bff');
