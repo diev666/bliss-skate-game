@@ -18,12 +18,8 @@ section#leaderboard,section#help{background:var(--panel);border:1px solid var(--
 .lb-actions{display:flex;gap:8px;justify-content:flex-end}
 .foot{opacity:.7;text-align:center}
 
-
 /* Music player */
-#player .player-wrap{
-  display:flex; gap:8px; align-items:center; justify-content:flex-start;
-  background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:8px 10px;
-}
+#player .player-wrap{ display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:8px 10px; }
 #player button{ background:transparent; border:1px solid var(--line); color:var(--ink); padding:6px 10px; border-radius:10px; cursor:pointer }
 #player button:hover{ border-color:var(--accent) }
 #track{ opacity:.85; margin-left:6px }
