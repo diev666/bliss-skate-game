@@ -130,7 +130,7 @@ function update(dt){
   state.specialActive = input.special && state.special>0;
   const realDt=dt;
   if(state.specialActive){ state.special=Math.max(0, state.special - state.specialDrainPerSec*(realDt/1000)); if(state.special===0) state.specialActive=false; }
-  if(wasActive && !state.specialActive) state.cdRespawnLock = Math.max(state.cdRespawnLock, 5000);
+  if(wasActive && !state.specialActive) state.cdRespawnLock = Math.max(state.cdRespawnLock, 2000);
   if(state.cdRespawnLock>0) state.cdRespawnLock=Math.max(0, state.cdRespawnLock - realDt);
 
   const worldScale = state.specialActive ? 0.5 : 1.0;
@@ -171,7 +171,7 @@ function update(dt){
   // spawn timers (CD pausado no especial ou lock)
   state.spawnCooldown -= dtWorld;
   state.cdCooldown -= (state.specialActive||state.cdRespawnLock>0) ? 0 : dtWorld;
-  if(state.spawnCooldown<=0){ spawnObstacle(); state.spawnCooldown = (1000 - Math.min(500, Math.floor(state.score/10)*12)) / diffFactor; }
+  if(state.spawnCooldown<=0){ spawnObstacle(); state.spawnCooldown = (1300 - Math.min(450, Math.floor(state.score/15)*10)) / diffFactor; }
   if(state.cdCooldown<=0){ spawnCD(); state.cdCooldown = 1100 / diffFactor; }
 
   // mover mundo (scale)
