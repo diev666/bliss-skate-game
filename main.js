@@ -1,10 +1,11 @@
-// BLISS — Skate Trick v7.2
+// Skate Bliss v7.6.1
 // - Playlist {file,title} + volume slider (default 30%)
 // - Fallbacks robustos (sem travar o canvas/jogo)
 // - Sem placeholders de música
 
 // Safe DOM helpers
 function $(s){ return document.querySelector(s); }
+const VERSION='761'; const CB='?v='+VERSION; let assetErrors=[];
 function on(el,ev,fn){ if(el && el.addEventListener) el.addEventListener(ev,fn); }
 
 // Canvas
@@ -31,11 +32,11 @@ let sfxMuted=opts.sfx; if(btnMuteSFX){ btnMuteSFX.textContent=sfxMuted?'🔇 SFX
 function playSFX(a){ if(!sfxMuted && a){ try{ a.currentTime=0; a.play(); }catch(_){} }}
 
 // Assets
-const imgSkater=new Image(); imgSkater.src='assets/skater.png';
-const imgObs=new Image();    imgObs.src='assets/obstacles.png';
-const imgCDs=new Image();    imgCDs.src='assets/collectibles.png';
-const imgGround=new Image(); imgGround.src='assets/ground.png';
-const imgSky=new Image();    imgSky.src='assets/skyline.png';
+const imgSkater=new Image(); imgSkater.onerror=()=>assetErrors.push('skater.png'); imgSkater.src='assets/skater.png'+CB;
+const imgObs=new Image();    imgObs.onerror=()=>assetErrors.push('obstacles.png'); imgObs.src='assets/obstacles.png'+CB;
+const imgCDs=new Image();    imgCDs.onerror=()=>assetErrors.push('collectibles.png'); imgCDs.src='assets/collectibles.png'+CB;
+const imgGround=new Image(); imgGround.onerror=()=>assetErrors.push('ground.png'); imgGround.src='assets/ground.png'+CB;
+const imgSky=new Image();    imgSky.onerror=()=>assetErrors.push('skyline.png'); imgSky.src='assets/skyline.png'+CB;
 
 // Input
 const input={left:false,right:false,jump:false};
@@ -370,6 +371,16 @@ function render(){
 
   ctx.restore();
 
+  // Asset health banner
+  if(assetErrors.length){
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(10,10, c.width-20, 40);
+    ctx.font='12px system-ui'; ctx.fillStyle='#ff7b7b';
+    ctx.fillText('Arquivos faltando: '+assetErrors.join(', ')+' — confira a pasta /assets no GitHub.', 20, 35);
+    ctx.restore();
+  }
+
+
   // === UI Screens ===
   ctx.save();
   ctx.fillStyle='#fff';
@@ -447,6 +458,16 @@ function render(){
     }
   }
   ctx.restore();
+
+  // Asset health banner
+  if(assetErrors.length){
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(10,10, c.width-20, 40);
+    ctx.font='12px system-ui'; ctx.fillStyle='#ff7b7b';
+    ctx.fillText('Arquivos faltando: '+assetErrors.join(', ')+' — confira a pasta /assets no GitHub.', 20, 35);
+    ctx.restore();
+  }
+
   drawFade();
 
 }
@@ -461,7 +482,7 @@ function trkTitle(i){ const it=playlist[i]; return (typeof it==='string')? it : 
 
 async function loadPlaylist(){
   try{
-    const res = await fetch('assets/music/playlist.json', {cache:'no-store'});
+    const res = await fetch('assets/music/playlist.json'+CB, {cache:'no-store'});
     if(res.ok){
       const arr = await res.json();
       playlist = Array.isArray(arr) ? arr.map(it => (typeof it==='string') ? ({file:it,title:it}) : it) : [];
