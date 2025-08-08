@@ -1,12 +1,78 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BLISS — SKATE TRICK</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BLISS — Skate Trick (v7.2)</title>
+  <meta name="description" content="Skate runner 2D com CDs, multiplicador, partículas, SFX e trilha com playlist.">
+  <link rel="preload" as="image" href="assets/skater.png"/>
+  <link rel="preload" as="image" href="assets/obstacles.png"/>
+  <link rel="preload" as="image" href="assets/collectibles.png"/>
+  <link rel="preload" as="image" href="assets/ground.png"/>
+  <link rel="preload" as="image" href="assets/skyline.png"/>
+  <link rel="stylesheet" href="style.css?v=720"/>
 </head>
 <body>
-  <h1>BLISS — SKATE TRICK (v7.1)</h1>
-  <p>Arquivos do jogo aqui...</p>
+  <main id="app">
+    <header class="topbar">
+      <h1>BLISS — Skate Trick</h1>
+      <div class="controls">
+        <button id="btn-help" aria-label="Ajuda">?</button>
+        <button id="btn-mute-sfx" aria-label="SFX">🔈 SFX</button>
+      </div>
+    </header>
+
+    <section id="game-wrap">
+      <canvas id="game" width="480" height="270"></canvas>
+      <div id="hud">
+        <div class="stat">Pontuação: <span id="score">0</span></div>
+        <div class="stat">Recorde: <span id="best">0</span></div>
+        <div class="stat">MULT: <span id="mult">1.0×</span></div>
+        <div class="stat">CDs: <span id="cds">0</span></div>
+        <div class="stat"><button id="btn-leaderboard">Ranking</button></div>
+      </div>
+    </section>
+
+    <section id="leaderboard" hidden>
+      <h2>Ranking Local</h2>
+      <ol id="lb-list"></ol>
+      <div class="lb-actions">
+        <button id="btn-close-lb">Fechar</button>
+        <button id="btn-reset-lb">Resetar Ranking</button>
+      </div>
+    </section>
+
+    <section id="help" hidden>
+      <h2>Como jogar</h2>
+      <p>PC: <b>Setas</b> ou <b>A/D</b> para mover, <b>Espaço/↑</b> para pular. Mobile: toque no canvas para pular.</p>
+      <p>Pegue <b>CDs</b> para subir o <b>MULT</b>. Debug: <b>H</b> mostra hitboxes.</p>
+      <button id="btn-close-help">Fechar</button>
+    </section>
+
+    <section id="player">
+      <div class="player-wrap">
+        <button id="prev" title="Anterior">⏮</button>
+        <button id="play" title="Play/Pause">▶</button>
+        <button id="next" title="Próxima">⏭</button>
+        <span id="track">Carregando trilha…</span>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.30" title="Volume"/>
+        <button id="btn-mute-music">🔊 Música</button>
+      </div>
+    </section>
+
+    <footer class="foot"><small>© BLISS</small></footer>
+  </main>
+
+  <!-- SFX -->
+  <audio id="sfx-jump" src="assets/jump.wav" preload="auto"></audio>
+  <audio id="sfx-cd" src="assets/cd_pick.wav" preload="auto"></audio>
+  <audio id="sfx-cone" src="assets/hit_cone.wav" preload="auto"></audio>
+  <audio id="sfx-bag" src="assets/hit_bag.wav" preload="auto"></audio>
+  <audio id="sfx-bottle" src="assets/hit_bottle.wav" preload="auto"></audio>
+
+  <!-- Música -->
+  <audio id="music" preload="auto" crossorigin="anonymous"></audio>
+
+  <script type="module" src="main.js?v=720"></script>
 </body>
 </html>

@@ -17,5 +17,6 @@ section#leaderboard,section#help{background:var(--panel);border:1px solid var(--
 #lb-list{margin:0 0 10px 22px}
 .lb-actions{display:flex;gap:8px;justify-content:flex-end}
 #player .player-wrap{display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
-#player #vol{width:160px; accent-color:var(--accent)}
+#track{opacity:.85;margin-left:6px}
+#vol{width:160px;accent-color:var(--accent)}
 .foot{opacity:.7;text-align:center}
