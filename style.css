@@ -1,0 +1,23 @@
+:root{
+  --bg:#0e0e10; --panel:#141418; --ink:#f3f3f3; --muted:#a5a5ad; --line:#23232a; --accent:#9d7bff;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+#app{max-width:960px;margin:0 auto;padding:16px;display:grid;gap:12px}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:18px;margin:0;color:var(--ink)}
+.controls button{margin-left:8px}
+#game-wrap{display:grid;gap:10px}
+#game{width:100%;height:auto;aspect-ratio:16/9;display:block;background:#0b0b0d;border:1px solid var(--line);border-radius:14px;image-rendering:pixelated}
+#hud{display:flex;gap:12px;align-items:center;justify-content:space-between;font-weight:600}
+.stat{background:var(--panel);border:1px solid var(--line);padding:8px 10px;border-radius:10px;min-width:140px;text-align:center}
+button{background:transparent;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+section#leaderboard,section#help{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+#lb-list{margin:0 0 10px 22px}
+.lb-actions{display:flex;gap:8px;justify-content:flex-end}
+.foot{opacity:.7;text-align:center}
+@media (max-width:520px){
+  .stat{min-width:auto;flex:1}
+  #hud{gap:8px}
+}

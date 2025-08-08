@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BLISS — Skate Trick</title>
+  <meta name="description" content="Mini game de skate 2D em HTML5, com pontuação e ranking local.">
+  <link rel="preload" as="image" href="assets/sprites.png"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <main id="app">
+    <header class="topbar">
+      <h1>BLISS — Skate Trick</h1>
+      <div class="controls">
+        <button id="btn-help" aria-label="Ajuda">?</button>
+        <button id="btn-mute" aria-label="Áudio">🔈</button>
+      </div>
+    </header>
+
+    <section id="game-wrap">
+      <canvas id="game" width="480" height="270" title="Jogo de skate BLISS"></canvas>
+      <div id="hud">
+        <div class="stat">Pontuação: <span id="score">0</span></div>
+        <div class="stat">Recorde: <span id="best">0</span></div>
+        <div class="stat"><button id="btn-leaderboard">Ranking</button></div>
+      </div>
+    </section>
+
+    <section id="leaderboard" hidden>
+      <h2>Ranking Local</h2>
+      <ol id="lb-list"></ol>
+      <div class="lb-actions">
+        <button id="btn-close-lb">Fechar</button>
+        <button id="btn-reset-lb" title="Apaga o ranking armazenado no navegador">Resetar Ranking</button>
+      </div>
+    </section>
+
+    <section id="help" hidden>
+      <h2>Como jogar</h2>
+      <p>PC: <b>Setas</b> ou <b>A/D</b> para mover, <b>Espaço/↑</b> para pular.<br>
+         Mobile: toque no canvas para pular.</p>
+      <p>Desvie dos obstáculos. Sua pontuação sobe com o tempo. Se bater, a corrida termina e você pode gravar no ranking local.</p>
+      <button id="btn-close-help">Fechar</button>
+    </section>
+
+    <footer class="foot">
+      <small>© BLISS</small>
+    </footer>
+  </main>
+
+  <audio id="sfx-jump" src="" preload="auto"></audio>
+  <audio id="sfx-hit" src="" preload="auto"></audio>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
