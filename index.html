@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>BLISS — Skate Trick</title>
-  <meta name="description" content="Mini game de skate 2D em HTML5, com pontuação e ranking local.">
-  <link rel="preload" as="image" href="assets/sprites.png"/>
+  <title>BLISS — Skate Trick (v2)</title>
+  <meta name="description" content="Mini game de skate 2D em HTML5, com sprites, spawn balanceado e ranking local.">
+  <link rel="preload" as="image" href="assets/skater.png"/>
+  <link rel="preload" as="image" href="assets/obstacles.png"/>
+  <link rel="preload" as="image" href="assets/ground.png"/>
+  <link rel="preload" as="image" href="assets/skyline.png"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
@@ -19,7 +22,7 @@
     </header>
 
     <section id="game-wrap">
-      <canvas id="game" width="480" height="270" title="Jogo de skate BLISS"></canvas>
+      <canvas id="game" width="480" height="270"></canvas>
       <div id="hud">
         <div class="stat">Pontuação: <span id="score">0</span></div>
         <div class="stat">Recorde: <span id="best">0</span></div>
@@ -32,7 +35,7 @@
       <ol id="lb-list"></ol>
       <div class="lb-actions">
         <button id="btn-close-lb">Fechar</button>
-        <button id="btn-reset-lb" title="Apaga o ranking armazenado no navegador">Resetar Ranking</button>
+        <button id="btn-reset-lb">Resetar Ranking</button>
       </div>
     </section>
 
@@ -40,17 +43,12 @@
       <h2>Como jogar</h2>
       <p>PC: <b>Setas</b> ou <b>A/D</b> para mover, <b>Espaço/↑</b> para pular.<br>
          Mobile: toque no canvas para pular.</p>
-      <p>Desvie dos obstáculos. Sua pontuação sobe com o tempo. Se bater, a corrida termina e você pode gravar no ranking local.</p>
+      <p>Desvie de cones, sacos de lixo e garrafas. Spawn balanceado, progressão suave.</p>
       <button id="btn-close-help">Fechar</button>
     </section>
 
-    <footer class="foot">
-      <small>© BLISS</small>
-    </footer>
+    <footer class="foot"><small>© BLISS</small></footer>
   </main>
-
-  <audio id="sfx-jump" src="" preload="auto"></audio>
-  <audio id="sfx-hit" src="" preload="auto"></audio>
 
   <script type="module" src="main.js"></script>
 </body>
