@@ -5,7 +5,7 @@
 
 // Safe DOM helpers
 function $(s){ return document.querySelector(s); }
-const VERSION='766'; const CB='?v='+VERSION; let assetErrors=[];
+const VERSION='767'; const CB='?v='+VERSION; let assetErrors=[];
 function on(el,ev,fn){ if(el && el.addEventListener) el.addEventListener(ev,fn); }
 
 // Canvas
@@ -97,19 +97,6 @@ state.showHit = opts.hit;
 // Modes: 'MENU', 'PLAY', 'PAUSE', 'HELP', 'OPTIONS', 'SKINS', 'CREDITS', 'GAMEOVER'
 state.mode = 'MENU';
 state.fade = 0; // for transitions
-// Options persisted
-
-');
-    return {
-      vol: typeof o.vol==='number'? o.vol : 0.30,
-      sfx: typeof o.sfx==='boolean'? o.sfx : false,
-      hit: typeof o.hit==='boolean'? o.hit : false,
-      diff: (o.diff==='FAST'?'FAST':'NORMAL')
-    };
-  }catch(_){ return {vol:0.30,sfx:false,hit:false,diff:'NORMAL'}; }
-}
-
-
 // apply opts to current session
 if(musicEl){ musicEl.volume = opts.vol; }
 if(volEl){ volEl.value = String(opts.vol.toFixed(2)); }
