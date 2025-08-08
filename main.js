@@ -134,6 +134,22 @@ addEventListener('keyup',e=>{
   if(e.code==='Space'||e.code==='ArrowUp') input.jump=false;
 });
 
+
+/* ---------- Menu State ---------- */
+const MENU_MAIN = ['JOGAR','OPÇÕES','COMO JOGAR','CRÉDITOS'];
+let menuIndex=0;
+const MENU_OPT  = ['MÚSICA','SFX','HITBOXES','DIFICULDADE','VOLTAR'];
+let optIndex=0;
+let fade=0;
+
+function drawCentered(text, y, color='#fff', size=18){
+  ctx.save();
+  ctx.fillStyle=color; ctx.font=`bold ${size}px system-ui`;
+  const w = ctx.measureText(text).width;
+  ctx.fillText(text, (cvs.width - w)/2, y);
+  ctx.restore();
+}
+
 /* ---------- Game State ---------- */
 const groundY = 230;
 const GRAV = 0.45;
@@ -190,7 +206,8 @@ function addParticles(x,y,n=10,color='#9d7bff'){
 function spawnObstacle(){
   const types = ['cone','bag','bottle'];
   const t = types[Math.floor(Math.random()*types.length)];
-  state.obstacles.push({t, x:cvs.width+20, y:groundY-14, w:18, h:14, sfx:t});
+  const h = 16, w = 18; // base hitbox
+  state.obstacles.push({t, x:cvs.width+20, y:groundY, w, h:14, sfx:t});
 }
 function spawnCD(){
   const y = groundY - rand(40,110);
@@ -344,10 +361,11 @@ function render(){
 
   // obstacles
   for(const o of state.obstacles){
-    ctx.fillStyle='#000';
-    if(img.obs.complete){ ctx.drawImage(img.obs,0,0,16,16, o.x,o.y-16, 24,16); }
-    else{ ctx.fillRect(o.x,o.y-16,18,14); }
-    if(state.showHit){ ctx.strokeStyle='lime'; ctx.strokeRect(o.x,o.y-(o.h||14), (o.w||18),(o.h||14)); }
+    const frame = (o.t==='cone'?0:(o.t==='bag'?1:2));
+    const sx = frame*16, sy=0;
+    if(img.obs.complete){ ctx.drawImage(img.obs, sx,sy,16,16, o.x, o.y-16, 20,16); }
+    else{ ctx.fillStyle='#ff7'; ctx.fillRect(o.x, o.y-16, 18,14); }
+    if(state.showHit){ ctx.strokeStyle='lime'; ctx.strokeRect(o.x, o.y-(o.h||14), (o.w||18), (o.h||14)); }
   }
 
   // CDs
@@ -384,6 +402,57 @@ function render(){
 
   ctx.restore();
 
+
+  if(state.mode==='MENU'){ 
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    drawCentered('Skate Bliss', 80, '#fff', 18);
+    ctx.font='12px system-ui'; ctx.fillStyle='#a5a5ad'; drawCentered('↑/↓ navega  •  Enter seleciona', 100, '#a5a5ad', 12);
+    for(let i=0;i<MENU_MAIN.length;i++){
+      const y = 132 + i*20;
+      const txt = MENU_MAIN[i];
+      ctx.fillStyle = (i===menuIndex)? '#fffb7a':'#fff';
+      const w=ctx.measureText(txt).width;
+      ctx.fillText(txt, (cvs.width-w)/2, y);
+    }
+  }
+  if(state.mode==='OPTIONS'){ 
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    drawCentered('Opções', 80, '#fff', 18);
+    const items = [
+      `MÚSICA: ${musicEl.muted?'OFF':'ON'}`,
+      `SFX: ${sfxMuted?'OFF':'ON'}`,
+      `HITBOXES: ${state.showHit?'ON':'OFF'}`,
+      `DIFICULDADE: ${opts.diff}`,
+      'VOLTAR'
+    ];
+    ctx.font='12px system-ui';
+    for(let i=0;i<items.length;i++){ 
+      const y = 120 + i*20;
+      const txt = items[i];
+      ctx.fillStyle = (i===optIndex)? '#fffb7a':'#fff';
+      const w=ctx.measureText(txt).width;
+      ctx.fillText(txt, (cvs.width-w)/2, y);
+    }
+    ctx.fillStyle='#a5a5ad'; drawCentered('←/→ alterna  •  Enter alterna  •  ESC volta', 220, '#a5a5ad', 12);
+  }
+  if(state.mode==='HELP'){ 
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    drawCentered('Como jogar', 80, '#fff', 18);
+    ctx.font='12px system-ui'; ctx.fillStyle='#ddd';
+    const lines=[
+      'PC: ←/→ ou A/D move; Espaço/↑ pula; duplo Espaço = Kickflip; ←/→ no ar = Shove-it.',
+      'Pegue CDs para crescer o MULT e acumule COMBO; ao pousar, ganha os pontos.'
+    ];
+    lines.forEach((t,i)=>{ drawCentered(t, 120+i*18, '#ddd', 12); });
+    drawCentered('ESC para voltar', 220, '#a5a5ad', 12);
+  }
+  if(state.mode==='CREDITS'){ 
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    drawCentered('Créditos', 80, '#fff', 18);
+    ['BLISS','DIEV','dievbliss.com'].forEach((t,i)=> drawCentered(t, 120+i*18, '#ddd', 12));
+    drawCentered('ESC para voltar', 220, '#a5a5ad', 12);
+  }
+
   // menu/overlays
   if(state.mode==='MENU'){
     ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,0,cvs.width,cvs.height);
@@ -397,11 +466,11 @@ function render(){
   }
   if(state.mode==='GAMEOVER'){
     ctx.fillStyle='rgba(0,0,0,.45)'; ctx.fillRect(0,0,cvs.width,cvs.height);
-    ctx.fillStyle='#fff'; ctx.font='bold 16px system-ui';
-    ctx.fillText('Game Over', 190, 90);
-    ctx.font='12px system-ui';
-    ctx.fillText(`Score: ${state.score}  •  Best: ${state.best}  •  CDs: ${state.cdCount}`, 110, 114);
-    ctx.fillText('ENTER para reiniciar • ESC para menu', 135, 138);
+    drawCentered('Game Over', 100, '#fff', 18);
+    ctx.font='12px system-ui'; ctx.fillStyle='#fff';
+    const line1 = `Score: ${state.score}  •  Best: ${state.best}  •  CDs: ${state.cdCount}`;
+    drawCentered(line1, 124, '#fff', 12);
+    drawCentered('ENTER para reiniciar • ESC para menu', 148, '#ddd', 12);
   }
 }
 
@@ -428,3 +497,36 @@ requestAnimationFrame(loop);
 
 /* ---------- Start ---------- */
 loadPlaylist();
+
+
+addEventListener('keydown',e=>{
+  if(state.mode==='MENU'){
+    if(e.code==='ArrowDown'||e.code==='KeyS') menuIndex=(menuIndex+1)%MENU_MAIN.length;
+    if(e.code==='ArrowUp'||e.code==='KeyW') menuIndex=(menuIndex-1+MENU_MAIN.length)%MENU_MAIN.length;
+    if(e.code==='Enter'){
+      const pick=MENU_MAIN[menuIndex];
+      if(pick==='JOGAR'){ resetRun(); }
+      else if(pick==='OPÇÕES'){ state.mode='OPTIONS'; }
+      else if(pick==='COMO JOGAR'){ state.mode='HELP'; }
+      else if(pick==='CRÉDITOS'){ state.mode='CREDITS'; }
+    }
+  } else if(state.mode==='OPTIONS'){
+    if(e.code==='ArrowDown'||e.code==='KeyS') optIndex=(optIndex+1)%MENU_OPT.length;
+    if(e.code==='ArrowUp'||e.code==='KeyW') optIndex=(optIndex-1+MENU_OPT.length)%MENU_OPT.length;
+    if(e.code==='ArrowLeft'||e.code==='KeyA' || e.code==='ArrowRight'||e.code==='KeyD'){
+      const dir=(e.code==='ArrowRight'||e.code==='KeyD')?1:-1;
+      if(MENU_OPT[optIndex]==='MÚSICA'){ musicEl.muted = !musicEl.muted; btnMuteMusic.textContent = musicEl.muted?'🔇 Música':'🔊 Música'; }
+      if(MENU_OPT[optIndex]==='DIFICULDADE'){ opts.diff = (opts.diff==='NORMAL'?'FAST':'NORMAL'); diffFactor=(opts.diff==='FAST')?1.25:1.0; saveOpts(); }
+    }
+    if(e.code==='Enter'){
+      const pick=MENU_OPT[optIndex];
+      if(pick==='SFX'){ sfxMuted=!sfxMuted; opts.sfx=sfxMuted; saveOpts(); btnMuteSFX.textContent = sfxMuted?'🔇 SFX':'🔈 SFX'; }
+      if(pick==='HITBOXES'){ state.showHit=!state.showHit; opts.hit=state.showHit; saveOpts(); }
+      if(pick==='VOLTAR'){ state.mode='MENU'; }
+      if(pick==='MÚSICA'){ musicEl.muted=!musicEl.muted; btnMuteMusic.textContent = musicEl.muted?'🔇 Música':'🔊 Música'; }
+      if(pick==='DIFICULDADE'){ opts.diff = (opts.diff==='NORMAL'?'FAST':'NORMAL'); diffFactor=(opts.diff==='FAST')?1.25:1.0; saveOpts(); }
+    }
+  } else if(state.mode==='HELP' || state.mode==='CREDITS'){
+    if(e.code==='Escape'||e.code==='Enter') state.mode='MENU';
+  }
+});
