@@ -1,27 +1,18 @@
 
-:root{
-  --bg:#101012;
-  --ink:#e7e7ee;
-  --ink-d:#a5a5ad;
-  --panel:#17171b;
-  --panel-2:#0c0c10;
-  --accent:#fffb7a;
-  --brand:#9d7bff;
-  --radius:14px;
-}
+:root{--bg:#101012;--ink:#e7e7ee;--ink2:#a9a9b5;--panel:#14141a;--line:#24242e;--accent:#fffb7a;--brand:#9d7bff}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui, -apple-system, Segoe UI, Roboto, Inter}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter}
 #app{display:grid;place-items:start center;padding:18px}
 .topbar{display:flex;gap:10px;justify-content:space-between;align-items:center;width:100%;max-width:860px}
 .topbar h1{font-size:14px;letter-spacing:.6px;margin:0}
-.topbar .controls button{background:#14141a;border:1px solid #202028;padding:6px 10px;border-radius:10px;color:var(--ink);cursor:pointer}
-#game-wrap{width:100%;max-width:860px}
-#game{width:100%;aspect-ratio:16/9;background:#000;border-radius:16px;border:1px solid #262630}
-#hud{display:flex;gap:12px;margin-top:14px}
-#hud .stat{background:#14141a;border:1px solid #24242e;padding:8px 12px;border-radius:12px}
-#hud #btn-lb{margin-left:auto;background:#14141a;border:1px solid #24242e;padding:8px 12px;border-radius:12px;color:var(--ink)}
-#player-bar{display:flex;align-items:center;gap:10px;margin-top:10px;background:#14141a;border:1px solid #24242e;border-radius:12px;padding:10px}
-#player-bar button{background:#1a1a22;border:1px solid #2a2a38;color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer}
-#player-bar #track{color:var(--ink-d)}
-#player-bar #vol{flex:1}
-#foot{margin:10px auto;text-align:center;color:#8a8a95;font-size:12px}
+.topbar .controls button{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer}
+#wrap{width:100%;max-width:860px}
+#game{width:100%;aspect-ratio:16/9;background:#000;border:1px solid #262630;border-radius:16px}
+#hud{display:flex;gap:12px;margin-top:12px}
+#hud .stat, #hud button{background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:12px}
+#hud button{margin-left:auto;color:var(--ink)}
+#player{display:flex;align-items:center;gap:10px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}
+#player button{background:#1a1a22;border:1px solid #2a2a38;color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer}
+#player #track{color:var(--ink2)}
+#player #vol{flex:1}
+#foot{text-align:center;color:var(--ink2);font-size:12px;margin:10px auto}
