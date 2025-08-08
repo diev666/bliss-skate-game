@@ -149,7 +149,7 @@ function updateParticles(dt){
 
 // Utils
 function aabb(ax,ay,aw,ah,bx,by,bw,bh){ return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by; }
-function addPopup(text,x,y,color='#fffb7a'){ state.popups.push({text,x,y,vy:-0.3,life:900,color}); }
+function addPopup(text,x,y,color='#fffb7a'){ state.popups.push({text,x,y,vy:-0.12,life:1600,color}); }
 function updatePopups(dt){ state.popups.forEach(p=>{p.y+=p.vy*dt;p.life-=dt}); state.popups=state.popups.filter(p=>p.life>0); }
 
 function endRun(hitType){
@@ -240,7 +240,13 @@ function render(){
   }
   // Player
   const p=state.player;
-  if(imgSkater.complete){ const sxp=(p.frame%3)*32; ctx.drawImage(imgSkater, sxp, 0, 32,32, p.x, p.y-24, 32,32);
+  if(imgSkater.complete){
+    // Frame map: 0 roll,1 ollie,2 air,3 kickflipA,4 kickflipB,5 shove-it
+    let f = p.frame%3;
+    if(state.trickNow==='KICKFLIP'){ f = (Math.floor(performance.now()/120)%2) ? 3 : 4; }
+    else if(state.trickNow==='SHOVE-IT'){ f = 5; }
+    const sxp = f*32;
+    ctx.drawImage(imgSkater, sxp, 0, 32,32, p.x, p.y-24, 32,32);
     if(state.showHit){ ctx.strokeStyle='#0f0'; ctx.strokeRect(p.x+HB_OFFSET_X,(p.y-24)+HB_OFFSET_Y,HB_WIDTH,HB_HEIGHT); } }
   // Obstacles
   for(const o of state.obstacles){
@@ -313,7 +319,7 @@ on(window,'keydown',e=>{
         state.trickNow = 'KICKFLIP';
         state.usedKickflip = true;
         state.combo += 150; // base trick points
-        state.trickFlash = 800; // ms
+        state.trickFlash = 1600; // ms
         addPopup('KICKFLIP +150', p.x, p.y-40);
         addParticles(p.x+12, p.y-10, 12, '#ffd36b');
       }
@@ -328,7 +334,7 @@ on(window,'keydown',e=>{
       state.trickNow = 'SHOVE-IT';
       state.usedShove = true;
       state.combo += 100;
-      state.trickFlash = 700;
+      state.trickFlash = 1400;
       addPopup('SHOVE-IT +100', p.x, p.y-40);
       addParticles(p.x+12, p.y-12, 10, '#9d7bff');
     }
