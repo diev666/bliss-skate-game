@@ -207,7 +207,7 @@ function spawnObstacle(){
   const types = ['cone','bag','bottle'];
   const t = types[Math.floor(Math.random()*types.length)];
   const h = 16, w = 18; // base hitbox
-  state.obstacles.push({t, x:cvs.width+20, y:groundY, w, h:14, sfx:t});
+  state.obstacles.push({t, x:cvs.width+20, y:groundY, w:18, h:18, sfx:t});
 }
 function spawnCD(){
   const y = groundY - rand(40,110);
@@ -362,8 +362,8 @@ function render(){
   // obstacles
   for(const o of state.obstacles){
     const frame = (o.t==='cone'?0:(o.t==='bag'?1:2));
-    const sx = frame*16, sy=0;
-    if(img.obs.complete){ ctx.drawImage(img.obs, sx, sy, 16, 16, Math.floor(o.x), Math.floor(o.y-16), 16, 16); }
+    const sx = frame*24, sy=0;
+    if(img.obs.complete){ ctx.drawImage(img.obs, sx, sy, 24, 24, Math.floor(o.x), Math.floor(o.y-24), 24, 24); }
     else{ ctx.fillStyle='#ff7'; ctx.fillRect(o.x, o.y-16, 18,14); }
     if(state.showHit){ ctx.strokeStyle='lime'; ctx.strokeRect(o.x, o.y-(o.h||14), (o.w||18), (o.h||14)); }
   }
